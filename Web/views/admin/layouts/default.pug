@@ -55,7 +55,7 @@ html(
     link(
       type="text/css"
       rel="stylesheet"
-      href="/admin/assets/css/app.min.css"
+      href=`/admin/assets/css/app.min.css?v=${assetVersion || 0}`
       )
     link(
       rel="stylesheet"
@@ -64,7 +64,7 @@ html(
     link(
       type="text/css"
       rel="stylesheet"
-      href="/admin/assets/css/main.css"
+      href=`/admin/assets/css/main.css?v=${assetVersion || 0}`
       )
   body
     script.

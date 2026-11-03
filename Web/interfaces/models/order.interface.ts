@@ -50,7 +50,7 @@ export interface IOrder extends Document {
   pointDiscount: number;
   pointEarned?: number;
   isAnomalous?: boolean;
-  anomalyScore?: number;
+  anomalyScore?: number | null;
   anomalyReason?: string;
   anomalyDismissedAt?: Date;
   anomalyScoredAt?: Date;

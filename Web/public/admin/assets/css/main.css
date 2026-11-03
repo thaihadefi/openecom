@@ -750,6 +750,16 @@ label[for] {
   padding: 48px 0 40px;
   color: #94a3b8;
 }
+/* A wide table scrolls sideways on phones; keep the empty message inside the visible part
+   instead of centring it across columns that are off screen. */
+.table-responsive:has(.tbl-empty) {
+  container-type: inline-size;
+}
+.table-responsive .tbl-empty {
+  position: sticky;
+  left: 0;
+  width: calc(100cqw - 24px);
+}
 .tbl-empty-icon {
   font-size: 40px;
   opacity: 0.35;

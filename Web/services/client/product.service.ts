@@ -373,12 +373,10 @@ export const getProductDetailBySlug = async (slug: string, productViewHistory: s
     }));
 
     const usingCfFallback = !productDetail.boughtTogether || productDetail.boughtTogether.length === 0;
-    const cfIdsByScore = usingCfFallback && FEATURES.RECOMMENDATIONS
-      ? [...(productDetail.cfRecommendations || [])]
-          .sort((a, b) => b.score - a.score)
-          .map((r) => r.productId)
+    const cfIds = usingCfFallback && FEATURES.RECOMMENDATIONS
+      ? (productDetail.cfRecommendations || []).map((r) => r.productId)
       : [];
-    const boughtTogetherIds = usingCfFallback ? cfIdsByScore : productDetail.boughtTogether;
+    const boughtTogetherIds = usingCfFallback ? cfIds : productDetail.boughtTogether;
 
     const [relatedProducts, boughtTogetherProductsRaw, reviewList] = await Promise.all([
       Product.find({
@@ -412,7 +410,7 @@ export const getProductDetailBySlug = async (slug: string, productViewHistory: s
     ]);
 
     const cfBoughtTogetherProducts = usingCfFallback
-      ? (cfIdsByScore
+      ? (cfIds
           .map((id) => boughtTogetherProductsRaw.find((p) => String(p.id) === String(id)))
           .filter((p) => Boolean(p)) as typeof boughtTogetherProductsRaw
         ).slice(0, PRODUCT_DISPLAY_CONFIG.BOUGHT_TOGETHER_LIMIT)

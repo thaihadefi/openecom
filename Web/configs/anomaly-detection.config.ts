@@ -10,7 +10,14 @@ export const ANOMALY_DETECTION_CONFIG = {
   RULE_VELOCITY_ORDER_COUNT: 2,
   RULE_VELOCITY_DISCOUNT_RATIO: 0.3,
   RULE_COUPON_STAMPEDE_COUNT: 5,
+  // Reuse counts leave out the buyer's own account.
+  RULE_PHONE_REUSE_COUNT: 1,
+  RULE_IP_REUSE_COUNT: 2,
+  // Public IPs change hands and sit behind carrier NAT, so they are compared over a day, not the whole window.
+  IP_REUSE_WINDOW_MINUTES: 60 * 24,
   BACKFILL_LOOKBACK_DAYS: 14,
   BACKFILL_BATCH_SIZE: 20,
+  // Pause before retrying a training run that had too few orders.
+  UNTRAINED_RETRY_MINUTES: 30,
   GUEST_ACCOUNT_AGE_MINUTES: 60 * 24 * 90,
 } as const;

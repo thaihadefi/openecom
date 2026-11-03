@@ -88,10 +88,14 @@ export interface DiversityCandidate {
 export const applyDiversityCap = (
   candidates: DiversityCandidate[],
   topN: number,
-  maxPerCategory: number
+  maxPerCategory: number,
+  alreadyPicked: DiversityCandidate[] = []
 ): ICfRecommendation[] => {
   const sorted = [...candidates].sort((a, b) => b.score - a.score);
   const categoryCounts = new Map<string, number>();
+  for (const cat of alreadyPicked.flatMap((c) => c.categories)) {
+    categoryCounts.set(cat, (categoryCounts.get(cat) || 0) + 1);
+  }
   const picked: DiversityCandidate[] = [];
   const deferred: DiversityCandidate[] = [];
 

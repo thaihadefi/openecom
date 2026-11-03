@@ -9,7 +9,9 @@ import {
   computeRecentOrderCounts,
   computeCouponVelocity,
   computeDistinctAccountsPerPhone,
-  computeDistinctAccountsPerIp
+  computeDistinctAccountsPerIp,
+  countOtherAccounts,
+  publicIpOf
 } from "../../helpers/order-anomaly-features.helper";
 import { getPagination } from "../../helpers/pagination.helper";
 import { PAGINATION } from "../../configs/pagination.config";
@@ -26,8 +28,12 @@ const {
   RULE_VELOCITY_ORDER_COUNT,
   RULE_VELOCITY_DISCOUNT_RATIO,
   RULE_COUPON_STAMPEDE_COUNT,
+  RULE_PHONE_REUSE_COUNT,
+  RULE_IP_REUSE_COUNT,
+  IP_REUSE_WINDOW_MINUTES,
   BACKFILL_LOOKBACK_DAYS,
-  BACKFILL_BATCH_SIZE
+  BACKFILL_BATCH_SIZE,
+  UNTRAINED_RETRY_MINUTES
 } = ANOMALY_DETECTION_CONFIG;
 
 let forest = new IsolationForest(NUM_TREES, SAMPLE_SIZE);
@@ -59,10 +65,10 @@ const runTraining = async () => {
     RECENT_WINDOW_MINUTES
   );
   const phoneAccountReuses = computeDistinctAccountsPerPhone(
-    contextOrders.map((o) => ({ phone: o.phone, userId: o.userId }))
+    contextOrders.map((o) => ({ phone: o.phone, userId: o.userId, createdAt: o.createdAt }))
   );
   const ipAccountReuses = computeDistinctAccountsPerIp(
-    contextOrders.map((o) => ({ ip: o.ip, userId: o.userId }))
+    contextOrders.map((o) => ({ ip: o.ip, userId: o.userId, createdAt: o.createdAt }))
   );
 
   const trainingStatuses = new Set<string>(TRAINING_ORDER_STATUSES);
@@ -105,11 +111,19 @@ const runTraining = async () => {
   return { trained: true, ordersUsed: trainingRows.length };
 };
 
+// Stops a store with too few orders from rescanning its history on every checkout.
+let lastUntrainedAttemptAt = 0;
+
+const ensureModelTrained = async (): Promise<boolean> => {
+  if (forest.isTrained()) return true;
+  if (Date.now() - lastUntrainedAttemptAt < UNTRAINED_RETRY_MINUTES * 60000) return false;
+  const result = await trainAnomalyModel();
+  if (!result.trained) lastUntrainedAttemptAt = Date.now();
+  return forest.isTrained();
+};
+
 export const scoreOrderForAnomaly = async (orderId: string) => {
-  if (!forest.isTrained()) {
-    await trainAnomalyModel();
-    if (!forest.isTrained()) return;
-  }
+  const modelReady = await ensureModelTrained();
 
   const order = await Order.findById(orderId).select("userId phone ip coupon discount subTotal createdAt");
   if (!order) return;
@@ -117,11 +131,15 @@ export const scoreOrderForAnomaly = async (orderId: string) => {
   const createdAt = order.createdAt;
   const windowStart = new Date(createdAt.getTime() - RECENT_WINDOW_MINUTES * 60000);
   const reuseWindowStart = new Date(createdAt.getTime() - TRAINING_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+  const ipWindowStart = new Date(createdAt.getTime() - IP_REUSE_WINDOW_MINUTES * 60000);
   const identityFilter = order.userId
     ? { userId: order.userId }
     : order.phone
-      ? { phone: order.phone, userId: "" }
+      ? { phone: order.phone, userId: { $in: ["", null] } }
       : null;
+
+  const publicIp = publicIpOf(order.ip);
+  const userId = order.userId ? String(order.userId) : undefined;
 
   const [recentOrderCount, couponVelocity, phoneAccountReuse, ipAccountReuse, account] = await Promise.all([
     identityFilter
@@ -146,15 +164,15 @@ export const scoreOrderForAnomaly = async (orderId: string) => {
           phone: order.phone,
           userId: { $exists: true, $nin: [null, ""] },
           createdAt: { $gte: reuseWindowStart, $lt: createdAt }
-        }).then((ids) => ids.length)
+        }).then((ids) => countOtherAccounts(new Set(ids.map(String)), userId))
       : Promise.resolve(0),
-    order.ip
+    publicIp
       ? Order.distinct("userId", {
           deleted: false,
-          ip: order.ip,
+          ip: publicIp,
           userId: { $exists: true, $nin: [null, ""] },
-          createdAt: { $gte: reuseWindowStart, $lt: createdAt }
-        }).then((ids) => ids.length)
+          createdAt: { $gte: ipWindowStart, $lt: createdAt }
+        }).then((ids) => countOtherAccounts(new Set(ids.map(String)), userId))
       : Promise.resolve(0),
     order.userId ? AccountUser.findById(order.userId).select("createdAt") : Promise.resolve(null)
   ]);
@@ -171,7 +189,8 @@ export const scoreOrderForAnomaly = async (orderId: string) => {
     { recentOrderCount, couponVelocity, phoneAccountReuse, ipAccountReuse }
   );
 
-  const score = forest.score(toVector(featureVector));
+  // Without a trained model the rules still run, but the order stays unscored so backfill revisits it.
+  const score = modelReady ? forest.score(toVector(featureVector)) : null;
 
   const matchedRules: string[] = [];
   if (recentOrderCount >= RULE_VELOCITY_ORDER_COUNT && discountRatio >= RULE_VELOCITY_DISCOUNT_RATIO) {
@@ -180,17 +199,27 @@ export const scoreOrderForAnomaly = async (orderId: string) => {
   if (couponVelocity >= RULE_COUPON_STAMPEDE_COUNT) {
     matchedRules.push("coupon_stampede_rule");
   }
+  if (phoneAccountReuse >= RULE_PHONE_REUSE_COUNT) {
+    matchedRules.push("phone_reuse_rule");
+  }
+  if (ipAccountReuse >= RULE_IP_REUSE_COUNT) {
+    matchedRules.push("ip_reuse_rule");
+  }
 
-  const isAnomalous = matchedRules.length > 0 || score >= ANOMALY_THRESHOLD;
+  const isAnomalous = matchedRules.length > 0 || (score !== null && score >= ANOMALY_THRESHOLD);
   const anomalyReason = matchedRules.length > 0 ? matchedRules.join("+") : isAnomalous ? "ml_score" : null;
 
   await Order.updateOne(
     { _id: order._id },
-    { $set: { anomalyScore: score, isAnomalous, anomalyReason, anomalyScoredAt: new Date() } }
+    modelReady
+      ? { $set: { anomalyScore: score, isAnomalous, anomalyReason, anomalyScoredAt: new Date() } }
+      : { $set: { anomalyScore: null, isAnomalous, anomalyReason }, $unset: { anomalyScoredAt: "" } }
   );
 };
 
 export const backfillMissedScoring = async () => {
+  if (!(await ensureModelTrained())) return { backfilled: 0 };
+
   const since = new Date(Date.now() - BACKFILL_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
   const missed = await Order.find({
     deleted: false,

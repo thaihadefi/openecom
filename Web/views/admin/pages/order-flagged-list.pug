@@ -2,6 +2,7 @@ extends ../layouts/default.pug
 include ../mixins/index.pug
 
 block main
+  - const reasonLabels = { velocity_discount_rule: "Rapid orders + high discount", coupon_stampede_rule: "Coupon stampede", phone_reuse_rule: "Multi-account phone", ip_reuse_rule: "Multi-account IP" }
   .row
     .col-12
       .card
@@ -43,16 +44,16 @@ block main
                       td #{item.phone}
                       td.text-end.text-nowrap #{formatPrice(item.total)}
                       td.text-center
-                        span.badge.bg-danger #{(item.anomalyScore || 0).toFixed(2)}
+                        if (typeof item.anomalyScore === "number")
+                          span.badge.bg-danger #{item.anomalyScore.toFixed(2)}
+                        else
+                          span.text-muted(title="Not scored by the model yet") —
                       td
-                        - const reasons = (item.anomalyReason || "").split("+")
-                        each reason in reasons
-                          if (reason === "velocity_discount_rule")
-                            span.badge.bg-warning.text-dark.me-1 Rapid orders + high discount
-                          else if (reason === "coupon_stampede_rule")
-                            span.badge.bg-warning.text-dark.me-1 Coupon stampede
+                        each reason in (item.anomalyReason || "").split("+").filter(Boolean)
+                          if reasonLabels[reason]
+                            span.badge.bg-warning.text-dark.me-1 #{reasonLabels[reason]}
                           else
-                            span.badge.bg-secondary.me-1 Isolation Forest
+                            span.badge.bg-secondary.me-1 #{reason === "ml_score" ? "Isolation Forest" : reason}
                       td.text-center #{item.orderStatus}
                       td.text-nowrap #{formatDateTime(item.createdAt)}
                       td.text-end
@@ -72,9 +73,7 @@ block main
                         )
                           i.las.la-check-circle.text-secondary.fs-20
                 else
-                  tr
-                    td(colspan="10" class="text-center text-muted")
-                      | No flagged orders right now.
+                  +empty-state("No flagged orders right now")
           +pagination()
 
 block script
