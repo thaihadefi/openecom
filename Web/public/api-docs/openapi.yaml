@@ -36,8 +36,10 @@ info:
     - Client to server: `CLIENT_SEND_MESSAGE`, `CLIENT_TYPING`, `CLIENT_OPEN_CHAT`, `CLIENT_DELETE_MESSAGE`, `ADMIN_OPEN_CHAT`, `ADMIN_TYPING`, `ADMIN_DELETE_ROOM`.
     - Server to client: `SERVER_SEND_MESSAGE`, `SERVER_SEND_STATUS`, `SERVER_MESSAGE_DELIVERED`, `SERVER_DELETE_MESSAGE`, `SERVER_DELETE_ROOM`, `SERVER_ROOM_ASSIGNED`, `SERVER_SEND_CLIENT_TYPING`, `SERVER_SEND_ADMIN_TYPING`, `SERVER_CLIENT_READ`, `SERVER_ADMIN_READ`, `SERVER_ADMIN_STATUS`, `USER_STATUS_ONLINE`, `LIST_USER_ONLINE`.
 servers:
+  - url: https://openecom.vietops.vn
+    description: Production server
   - url: http://localhost:3000
-    description: OpenEcom Web application (local)
+    description: Development server (local)
 tags:
   - name: Payment & Logistics (VNPAY, ZaloPay, GoShip)
     description: Payment gateway integrations (VNPAY, ZaloPay), webhooks, and GoShip automated courier rates

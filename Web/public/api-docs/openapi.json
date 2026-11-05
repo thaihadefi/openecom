@@ -11,8 +11,12 @@
   },
   "servers": [
     {
+      "url": "https://openecom.vietops.vn",
+      "description": "Production server"
+    },
+    {
       "url": "http://localhost:3000",
-      "description": "OpenEcom Web application (local)"
+      "description": "Development server (local)"
     }
   ],
   "tags": [
