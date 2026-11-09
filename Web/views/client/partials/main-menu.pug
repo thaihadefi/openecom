@@ -67,11 +67,17 @@ nav.d-none.d-lg-block(class="main_menu_2 main_menu")
               - const _mi = ((_mp[0]||'')[0]||'').toUpperCase() + ((_mp.length>1?_mp[_mp.length-1]:_mp[0]||'')[_mp.length>1?0:1]||'').toUpperCase()
               li
                 a.user(href="/dashboard")
-                  if accountUser.avatar && !accountUser.avatar.startsWith('http')
-                    b
-                      img.rounded-circle(alt=`${accountUser.fullName}` src=getFullUrl(accountUser.avatar) style="width:28px;height:28px;object-fit:cover")
-                  else
-                    div.avatar-initials.avatar-sm.notranslate(translate="no")= _mi
+                  - const hasMenuPhoto = accountUser.avatar && !accountUser.avatar.startsWith('http')
+                  b
+                    img.rounded-circle(
+                      alt=`${accountUser.fullName} profile photo`
+                      src=hasMenuPhoto ? getFullUrl(accountUser.avatar) : undefined
+                      style=hasMenuPhoto ? "width:28px;height:28px;object-fit:cover" : "display:none;width:28px;height:28px;object-fit:cover"
+                      profile-photo-preview
+                      onload="this.style.display='block';this.nextElementSibling.style.display='none'"
+                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                    )
+                    div.avatar-initials.avatar-sm.notranslate(style=hasMenuPhoto ? "display:none" : undefined translate="no")= _mi
                   span.menu_label.notranslate(translate="no") #{accountUser.fullName}
                 ul(class="user_dropdown")
                   li

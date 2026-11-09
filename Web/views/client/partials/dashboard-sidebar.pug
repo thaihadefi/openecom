@@ -6,22 +6,23 @@ div(class="dashboard_sidebar")
       - const _p = (accountUser.fullName || '').trim().split(/\s+/)
       - const _i = ((_p[0]||'')[0]||'').toUpperCase() + ((_p.length>1?_p[_p.length-1]:_p[0]||'')[_p.length>1?0:1]||'').toUpperCase()
       .img
-        if accountUser.avatar && !accountUser.avatar.startsWith('http')
-          img.img-fluid.w-100(
-            alt=`${accountUser.fullName} profile photo`
-            src=getFullUrl(accountUser.avatar)
-            profile-photo-preview
-            onerror=`this.style.display='none';this.nextElementSibling.style.display='flex'`
-          )
-          span.avatar-initials.avatar-sidebar.notranslate(style="display:none" profile-photo-preview translate="no") #{_i}
-        else
-          span.avatar-initials.avatar-sidebar.notranslate(profile-photo-preview translate="no") #{_i}
+        - const hasProfilePhoto = accountUser.avatar && !accountUser.avatar.startsWith('http')
+        img.img-fluid.w-100(
+          alt=`${accountUser.fullName} profile photo`
+          src=hasProfilePhoto ? getFullUrl(accountUser.avatar) : undefined
+          style=hasProfilePhoto ? undefined : "display:none"
+          profile-photo-preview
+          onload="this.style.display='block';this.nextElementSibling.style.display='none'"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+        )
+        span.avatar-initials.avatar-sidebar.notranslate(style=hasProfilePhoto ? "display:none" : undefined translate="no") #{_i}
         label(for="profile_photo" aria-label="Change profile photo")
           i.fas.fa-camera(aria-hidden="true")
         input(
           hidden=""
           id="profile_photo"
           type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
           )
       h3.notranslate(translate="no") #{accountUser.fullName}
       p.notranslate(translate="no") #{accountUser.email}

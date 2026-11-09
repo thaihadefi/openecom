@@ -103,7 +103,7 @@ app.get('/manifest.webmanifest', async (_req, res) => {
     const name = (general?.websiteName || '').trim() || 'OpenEcom';
     const iconUrl = general?.favicon
       ? `${mediaBase}${general.favicon}`
-      : '/images/favicon.ico';
+      : '/images/favicon.svg';
 
     const spaceIdx = name.lastIndexOf(' ', 12);
     const shortName = name.length > 12

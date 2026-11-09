@@ -88,7 +88,7 @@ const lockSubmit = (trigger) => {
 const confirmAction = (message, onConfirm) => {
   const modalEl = document.querySelector("#modalConfirm");
   if(!modalEl || typeof bootstrap === "undefined") {
-    if(window.confirm(message)) onConfirm();
+    notyf.error("Confirmation is unavailable. Please reload the page.");
     return;
   }
   modalEl.querySelector("#modalConfirmMessage").textContent = message;
@@ -1005,7 +1005,11 @@ const drawCart = () => {
         // A slower quote must not replace a newer addition, quantity change or empty cart.
         if (renderVersion !== cartRenderVersion) return;
         if(data.code == "error") {
-          localStorage.setItem("cart", JSON.stringify([]));
+          // A quote failure does not mean the customer removed their cart.
+          notyf.error(data.message || "Could not refresh your cart. Please try again.");
+          document.querySelector("[shipping-list]")?.replaceChildren();
+          restoreFocus();
+          return;
         }
 
         if(data.code == "success") {
@@ -1326,6 +1330,12 @@ const drawCart = () => {
           restoreFocus();
         }
       })
+      .catch(() => {
+        if (renderVersion !== cartRenderVersion) return;
+        document.querySelector("[shipping-list]")?.replaceChildren();
+        notyf.error("Could not refresh your cart. Please try again.");
+        restoreFocus();
+      });
   } else {
     const ulMiniCart = miniCart.querySelector(".offcanvas-body ul");
     ulMiniCart.innerHTML = "Your cart is empty.";
@@ -2781,8 +2791,9 @@ if(listButtonApi.length > 0) {
 }
 
 const boxMap = document.querySelector("#boxMap");
+let locationPicker = null;
 if (boxMap && typeof initLocationPicker === "function") {
-  initLocationPicker({
+  locationPicker = initLocationPicker({
     mapTarget: "#boxMap",
     searchInput: "#mapSearchInput",
     searchBtn: "#mapSearchBtn",
@@ -2886,31 +2897,44 @@ if(dashboardAddressEditForm) {
 }
 
 const profilePhoto = document.querySelector("#profile_photo");
-if(profilePhoto) {
-  profilePhoto.addEventListener("change", (event) => {
-    const avatar = event.target.files[0];
-    if(avatar) {
-      const formData = new FormData();
-      formData.append("avatar", avatar);
-
-      fetch(`/api/customers/me/avatar`, {
-        method: "PUT",
-        body: formData
-      })
-        .then(res => res.json())
-        .then(data => {
-          if(data.code == "error") {
-            notyf.error(data.message);
-          }
-
-          if(data.code == "success") {
-            const profilePhotoPreview = document.querySelector("[profile-photo-preview]");
-            profilePhotoPreview.src = `${domainCDN}${data.linkAvatar}`;
-            notyf.success(data.message);
-          }
-        })
+if (profilePhoto) {
+  profilePhoto.addEventListener("change", async () => {
+    const avatar = profilePhoto.files[0];
+    if (!avatar || profilePhoto.disabled) return;
+    if (!avatar.type.startsWith("image/")) {
+      notyf.error("Please select an image file!");
+      profilePhoto.value = "";
+      return;
     }
-  })
+    if (avatar.size > 5 * 1024 * 1024) {
+      notyf.error("Image file size must not exceed 5MB!");
+      profilePhoto.value = "";
+      return;
+    }
+    const formData = new FormData();
+    formData.append("avatar", avatar);
+    profilePhoto.disabled = true;
+    profilePhoto.setAttribute("aria-busy", "true");
+    try {
+      const response = await fetch("/api/customers/me/avatar", { method: "PUT", body: formData });
+      const data = await response.json();
+      if (!response.ok || data.code !== "success" || !data.linkAvatar) {
+        notyf.error(data.message || "Could not update profile photo!");
+        return;
+      }
+      document.querySelectorAll("img[profile-photo-preview]").forEach(image => {
+        image.src = `${domainCDN}${data.linkAvatar}`;
+      });
+      notyf.success(data.message);
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      notyf.error("Could not update profile photo. Please try again.");
+    } finally {
+      profilePhoto.disabled = false;
+      profilePhoto.removeAttribute("aria-busy");
+      profilePhoto.value = "";
+    }
+  });
 }
 
 const applyCouponForm = document.querySelector("#applyCouponForm");
@@ -2985,6 +3009,13 @@ if(checkoutPage) {
     collapse.show();
   }
 
+  // Coordinates can also be entered manually when the map cannot load.
+  checkoutPage.querySelectorAll('[name="latitude"], [name="longitude"]').forEach(input => {
+    input.addEventListener("change", () => drawCart());
+  });
+  document.getElementById("collapseThree")?.addEventListener("shown.bs.collapse", () => {
+    locationPicker?.getMap()?.updateSize();
+  });
   listInputUserAddress.forEach(input => {
     input.addEventListener("change", () => {
       listInputUserAddress.forEach(i => {
@@ -2999,10 +3030,7 @@ if(checkoutPage) {
       } else {
         collapse.hide();
       }
-      if(map) {
-        map.updateSize();
-      }
-
+      locationPicker?.getMap()?.updateSize();
       drawCart();
     })
   })
@@ -3543,7 +3571,7 @@ if (contactForm) {
         if (data.code === 'success') {
           notyf.success(data.message);
           event.target.reset();
-          validation.reset();
+          validation.refresh();
         } else {
           notyf.error(data.message);
         }

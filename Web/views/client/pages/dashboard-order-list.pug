@@ -80,7 +80,7 @@ block main
                                 stroke-linecap="round"
                                 )
                             | View Details
-                          if (FEATURES.REVIEWS)
+                          if (FEATURES.REVIEWS && order.orderStatus === "completed")
                             a(
                               href=`/dashboard/order/review/${order.id}`
                               class="review_order"

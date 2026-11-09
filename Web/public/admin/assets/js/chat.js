@@ -106,22 +106,32 @@ const renderAiText = (raw) => escapeHtml(raw)
   .replace(/\n/g, "<br>");
 
 const showAdminConfirm = (msg, onOk) => {
-  const overlay   = document.getElementById("admin-confirm-modal");
-  const msgEl     = overlay?.querySelector(".admin-confirm-msg");
-  const btnOk     = document.getElementById("admin-confirm-ok");
+  const overlay = document.getElementById("admin-confirm-modal");
+  const btnOk = document.getElementById("admin-confirm-ok");
   const btnCancel = document.getElementById("admin-confirm-cancel");
-  if (!overlay) { if (confirm(msg)) onOk(); return; }
-
+  if (!overlay || !btnOk || !btnCancel) {
+    if (typeof showConfirm === "function") showConfirm({ title: "Confirm", message: msg, okText: "Confirm", onOk });
+    else notyf.error("Confirmation is unavailable. Please reload the page.");
+    return;
+  }
+  const previousFocus = document.activeElement;
+  const msgEl = overlay.querySelector(".admin-confirm-msg");
   if (msgEl) msgEl.textContent = msg;
+  const close = () => {
+    overlay.classList.add("d-none");
+    btnOk.onclick = null;
+    btnCancel.onclick = null;
+    overlay.onclick = null;
+    overlay.onkeydown = null;
+    if (previousFocus?.isConnected) previousFocus.focus();
+  };
+  // Replace both callbacks on every opening, including after Cancel.
+  btnOk.onclick = () => { close(); onOk(); };
+  btnCancel.onclick = close;
+  overlay.onclick = event => { if (event.target === overlay) close(); };
+  overlay.onkeydown = event => { if (event.key === "Escape") { event.preventDefault(); close(); } };
   overlay.classList.remove("d-none");
-
-  const cleanup    = () => overlay.classList.add("d-none");
-  const handleOk   = () => { cleanup(); onOk(); btnOk.removeEventListener("click", handleOk); };
-  const handleCancel = () => { cleanup(); btnCancel.removeEventListener("click", handleCancel); };
-
-  btnOk.addEventListener("click", handleOk);
-  btnCancel.addEventListener("click", handleCancel);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) handleCancel(); }, { once: true });
+  btnCancel.focus();
 };
 
 const formChat = document.querySelector("[form-chat]");

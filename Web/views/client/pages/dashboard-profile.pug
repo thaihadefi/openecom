@@ -29,11 +29,11 @@ block main
                   span.notranslate(translate="no") #{accountUser.fullName}
                 li
                   span Email:
-                  | #{accountUser.email}
+                  span.notranslate(translate="no") #{accountUser.email}
                 li
                   span Phone:
-                  | #{accountUser.phone}
+                  span.notranslate(translate="no") #{accountUser.phone}
                 if (FEATURES.LOYALTY_POINTS)
                   li
                     span Reward Points:
-                    | #{formatNumber(((accountUser.totalPoint || 0) - (accountUser.usedPoint || 0)))} Points
+                    span #{formatNumber(((accountUser.totalPoint || 0) - (accountUser.usedPoint || 0)))} Points

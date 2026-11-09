@@ -70,22 +70,32 @@ const linkify = (escaped) => escaped.replace(/\bhttps?:\/\/[^\s<]+/g, (raw) => {
 });
 
 const showConfirm = (msg, onOk) => {
-  const overlay  = document.getElementById("chat-confirm-modal");
-  const msgEl    = overlay?.querySelector(".chat-confirm-msg");
-  const btnOk    = document.getElementById("chat-confirm-ok");
+  const overlay = document.getElementById("chat-confirm-modal");
+  const btnOk = document.getElementById("chat-confirm-ok");
   const btnCancel = document.getElementById("chat-confirm-cancel");
-  if (!overlay) { if (confirm(msg)) onOk(); return; }
-
+  if (!overlay || !btnOk || !btnCancel) {
+    if (typeof confirmAction === "function") confirmAction(msg, onOk);
+    else notyf.error("Confirmation is unavailable. Please reload the page.");
+    return;
+  }
+  const previousFocus = document.activeElement;
+  const msgEl = overlay.querySelector(".chat-confirm-msg");
   if (msgEl) msgEl.textContent = msg;
+  const close = () => {
+    overlay.classList.add("d-none");
+    btnOk.onclick = null;
+    btnCancel.onclick = null;
+    overlay.onclick = null;
+    overlay.onkeydown = null;
+    if (previousFocus?.isConnected) previousFocus.focus();
+  };
+  // Replace both callbacks on every opening, including after Cancel.
+  btnOk.onclick = () => { close(); onOk(); };
+  btnCancel.onclick = close;
+  overlay.onclick = event => { if (event.target === overlay) close(); };
+  overlay.onkeydown = event => { if (event.key === "Escape") { event.preventDefault(); close(); } };
   overlay.classList.remove("d-none");
-
-  const cleanup = () => overlay.classList.add("d-none");
-  const handleOk = () => { cleanup(); onOk(); btnOk.removeEventListener("click", handleOk); };
-  const handleCancel = () => { cleanup(); btnCancel.removeEventListener("click", handleCancel); };
-
-  btnOk.addEventListener("click", handleOk);
-  btnCancel.addEventListener("click", handleCancel);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) handleCancel(); }, { once: true });
+  btnCancel.focus();
 };
 
 const chatButton = document.querySelector("#chat-button");

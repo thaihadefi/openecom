@@ -16,7 +16,7 @@ import { IOrder, IOrderItem } from '../../interfaces/models/order.interface';
 import { IUserAddressInput } from '../../interfaces/models/user-address.interface';
 import { invalidateUserAuthCache } from './auth.service';
 import { metadataCache, invalidateProductCaches } from '../../helpers/metadata-cache.helper';
-import { upstreamStatus } from "../../helpers/http-response.helper";
+import { upstreamStatus, httpError } from "../../helpers/http-response.helper";
 
 export const invalidateUserDashboardCache = (userId: string) => {
   metadataCache.del(`user:dashboard:${userId}`);
@@ -193,6 +193,8 @@ export const setDefaultUserAddress = async (userId: string, addressId: string) =
   const session = await mongoose.startSession();
   try {
     await session.withTransaction(async () => {
+      const target = await UserAddress.findOne({ _id: addressId, userId }).select("_id").session(session);
+      if (!target) throw httpError(404, "Address does not exist!");
       await UserAddress.findOneAndUpdate(
         { userId, isDefault: true },
         { isDefault: false },

@@ -27,10 +27,10 @@ html(
       http-equiv="X-UA-Compatible"
       )
     link(
-      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.ico'}`
+      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.svg'}`
       rel="shortcut icon"
       )
-    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.css" integrity="sha384-snpJ3knpH6avB6cP1vPkNdmRzCYaCpom/3TNOyvo189BiogXYXQfXkyYpZ2/xADs" crossorigin="anonymous")
+    link(rel="stylesheet", href="/admin/assets/libs/notyf/notyf.min.css" integrity="sha384-snpJ3knpH6avB6cP1vPkNdmRzCYaCpom/3TNOyvo189BiogXYXQfXkyYpZ2/xADs" crossorigin="anonymous")
     link(href="/admin/assets/libs/uppy/uppy.min.css" rel="stylesheet")
     link(
       type="text/css"
@@ -44,7 +44,7 @@ html(
       )
     link(
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous"
+      href="/admin/assets/libs/font-awesome/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous"
       )
     link(
       type="text/css"
@@ -61,8 +61,8 @@ html(
 
     include ../partials/modal-confirm.pug
 
-    script(src="https://unpkg.com/just-validate@4.3.0/dist/just-validate.production.min.js" integrity="sha384-MTEqTcTyVLHVQNcumujWT8ThfE2tAm0jR8FP+YSLHn3KRydBdxTYaiK9USgsaU5e" crossorigin="anonymous")
-    script(src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js" integrity="sha384-uuNfwJfjOG2ukYi4eAB11/t3lP4Zjf75a3UhgkLzEpiX8JpJfacpG7Ye+0tiVMxT" crossorigin="anonymous")
+    script(src="/admin/assets/libs/just-validate/just-validate.production.min.js" integrity="sha384-MTEqTcTyVLHVQNcumujWT8ThfE2tAm0jR8FP+YSLHn3KRydBdxTYaiK9USgsaU5e" crossorigin="anonymous")
+    script(src="/admin/assets/libs/notyf/notyf.min.js" integrity="sha384-uuNfwJfjOG2ukYi4eAB11/t3lP4Zjf75a3UhgkLzEpiX8JpJfacpG7Ye+0tiVMxT" crossorigin="anonymous")
     script(src="/admin/assets/libs/tinymce/tinymce.min.js")
     script(src="/admin/assets/libs/bootstrap/js/bootstrap.bundle.min.js")
     script(src="/admin/assets/libs/simplebar/simplebar.min.js")

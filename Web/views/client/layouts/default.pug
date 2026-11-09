@@ -74,8 +74,7 @@ html(lang=storefront.language)
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap")
     link(rel="stylesheet", href=`/client/assets/css/notyf.min.css?v=${assetVersion}`)
     link(
-      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.ico'}?v=${assetVersion}`
-      type="image/x-icon"
+      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.svg'}?v=${assetVersion}`
       rel="icon"
       )
     //- PWA
@@ -86,7 +85,7 @@ html(lang=storefront.language)
     meta(name="apple-mobile-web-app-title" content=`${settingGeneral && settingGeneral.websiteName ? settingGeneral.websiteName : 'OpenEcom'}`)
     link(
       rel="apple-touch-icon"
-      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.ico'}`
+      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.svg'}`
       )
     link(
       href=`/client/assets/css/all.min.css?v=${assetVersion}`

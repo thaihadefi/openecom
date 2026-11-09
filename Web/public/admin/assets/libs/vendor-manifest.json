@@ -1,0 +1,146 @@
+[
+  {
+    "package": "notyf",
+    "version": "3.10.0",
+    "tarball": "https://registry.npmjs.org/notyf/-/notyf-3.10.0.tgz",
+    "integrity": "sha512-Mtnp+0qiZxgrH+TzVlzhWyZceHdAZ/UWK0/ju9U0HQeDpap1mZ8cC7H5wSI5mwgni6yeAjaxsTw0sbMK+aSuHw==",
+    "files": [
+      {
+        "path": "notyf/notyf.min.js",
+        "sha384": "sha384-uuNfwJfjOG2ukYi4eAB11/t3lP4Zjf75a3UhgkLzEpiX8JpJfacpG7Ye+0tiVMxT"
+      },
+      {
+        "path": "notyf/notyf.min.css",
+        "sha384": "sha384-snpJ3knpH6avB6cP1vPkNdmRzCYaCpom/3TNOyvo189BiogXYXQfXkyYpZ2/xADs"
+      },
+      {
+        "path": "notyf/LICENSE",
+        "sha384": "sha384-MOH0uZcD+vXWUUAZPwKfOczxyx2ydOh4nttXz7frdXDyZWEzXY921kQ700cq1ebj"
+      }
+    ]
+  },
+  {
+    "package": "just-validate",
+    "version": "4.3.0",
+    "tarball": "https://registry.npmjs.org/just-validate/-/just-validate-4.3.0.tgz",
+    "integrity": "sha512-9yS7ZnFk95vq+O7CAa7XZEJvZN5i6jTQWNhLwOjtgkSqiLxo7GZJhK8ViylP76fXPfHLs8tYWqi81XgxPF3OGA==",
+    "files": [
+      {
+        "path": "just-validate/just-validate.production.min.js",
+        "sha384": "sha384-MTEqTcTyVLHVQNcumujWT8ThfE2tAm0jR8FP+YSLHn3KRydBdxTYaiK9USgsaU5e"
+      },
+      {
+        "path": "just-validate/LICENSE",
+        "sha384": "sha384-wjajzyDIzJKYAEsK3A7nW9yycEQ1PpBczLKLyP4HP44hTevia3ohREuwPBH8GH0j"
+      }
+    ]
+  },
+  {
+    "package": "sortablejs",
+    "version": "1.15.6",
+    "tarball": "https://registry.npmjs.org/sortablejs/-/sortablejs-1.15.6.tgz",
+    "integrity": "sha512-aNfiuwMEpfBM/CN6LY0ibyhxPfPbyFeBTYJKCvzkJ2GkUpazIt3H+QIPAMHwqQ7tMKaHz1Qj+rJJCqljnf4p3A==",
+    "files": [
+      {
+        "path": "sortablejs/Sortable.min.js",
+        "sha384": "sha384-HZZ/fukV+9G8gwTNjN7zQDG0Sp7MsZy5DDN6VfY3Be7V9dvQpEpR2jF2HlyFUUjU"
+      },
+      {
+        "path": "sortablejs/LICENSE",
+        "sha384": "sha384-mevydalsL4d7yB2GsEFX1+hNJfVYvZK8+0MuGrlwEvk9zc1vAgLWOcvFi/Yc5sB+"
+      }
+    ]
+  },
+  {
+    "package": "mobius1-selectr",
+    "version": "2.4.13",
+    "tarball": "https://registry.npmjs.org/mobius1-selectr/-/mobius1-selectr-2.4.13.tgz",
+    "integrity": "sha512-Mk9qDrvU44UUL0EBhbAA1phfQZ7aMZPjwtL7wkpiBzGh8dETGqfsh50mWoX9EkjDlkONlErWXArHCKfoxVg0Bw==",
+    "files": [
+      {
+        "path": "selectr/selectr.min.js",
+        "sha384": "sha384-kpRfuhIjTUhRJPetumAT2UykEKnqXdurw75vUs2015lqpEhsRfkoOF/gMcrWr02F"
+      },
+      {
+        "path": "selectr/selectr.min.css",
+        "sha384": "sha384-O1PAcYRxlWavYIL+m80+1ZJEeTsz7WNgQ2OuONoGg4dgLExWaGMPQXVs5hlSbNIE"
+      },
+      {
+        "path": "selectr/LICENSE",
+        "sha384": "sha384-pWmtkgZ5YWZ+5LfU3FruDQk/l/9L0/s0enEgPaLM3+hj/ymBkBiB/n98sa/5zkzJ"
+      }
+    ]
+  },
+  {
+    "package": "jsoneditor",
+    "version": "10.4.2",
+    "tarball": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-10.4.2.tgz",
+    "integrity": "sha512-SQPCXlanU4PqdVsYuj2X7yfbLiiJYjklbksGfMKPsuwLhAIPxDlG43jYfXieGXvxpuq1fkw08YoRbkKXKabcLA==",
+    "files": [
+      {
+        "path": "jsoneditor/jsoneditor.min.js",
+        "sha384": "sha384-Om1Bp2exFp3Ll1dmNKTYPF4wSgGsZu1bXp+oe9yLEg58FKqabAAfDsNoW+qxuH1+"
+      },
+      {
+        "path": "jsoneditor/jsoneditor.min.css",
+        "sha384": "sha384-cj1rYBc4/dVYAknZMTkVCDRL6Knzugf32igVqsuFW0iRWFHKH8Ci8+ekC8gNsFZ+"
+      },
+      {
+        "path": "jsoneditor/img/jsoneditor-icons.svg",
+        "sha384": "sha384-2aGCIHVCvp7DMfKMhMMLMThyllO/HmcjSp9f2B+Vz4grB4W9CWkzEscVWd3/R9Mc"
+      },
+      {
+        "path": "jsoneditor/LICENSE",
+        "sha384": "sha384-dfVn6uo76gGGoDeZUlNAVBXdQvTZYqtLYeWWLKa3gzuBsukMPInkKZnVF7bwSn/D"
+      }
+    ]
+  },
+  {
+    "package": "@fortawesome/fontawesome-free",
+    "version": "6.7.2",
+    "tarball": "https://registry.npmjs.org/@fortawesome/fontawesome-free/-/fontawesome-free-6.7.2.tgz",
+    "integrity": "sha512-JUOtgFW6k9u4Y+xeIaEiLr3+cjoUPiAuLXoyKOJSia6Duzb7pq+A76P9ZdPDoAoxHdHzq6gE9/jKBGXlZT8FbA==",
+    "files": [
+      {
+        "path": "font-awesome/css/all.min.css",
+        "sha384": "sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-brands-400.ttf",
+        "sha384": "sha384-sVbZUNVZWPj8bqWYhryjUx8yliiq0NTMCDoGRhWBdl9049SfaNwMH4zKcYUCHYsC"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-regular-400.ttf",
+        "sha384": "sha384-k2+OiOWuJnJ+ykFVRnXlmenTtZk09Iyc9bQxTdLsGHVb5z94VFyPDZcc8KoTfhTQ"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-solid-900.ttf",
+        "sha384": "sha384-BgBSLF2YWxewkUxcUBiIIkLEfhga95l3wB6uwJJTqOK9KrccAVTfGj2+U8ZI6KpY"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-v4compatibility.ttf",
+        "sha384": "sha384-4QZPVj3VMwLrdBjvahsaEjW6vK17Fiq8Kr0f923UmlvNhw5mTPgv4RZ7/M4B9b1O"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-brands-400.woff2",
+        "sha384": "sha384-5bQWftm2RhZySCFP7cLHM9Q0J7z6ky5sbicvUH56HGBRUDIGyAj52Py3qqJcISlb"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-regular-400.woff2",
+        "sha384": "sha384-Z05gtC6+ONF8+7LTo5Vz1F6CZZS7YFou0LyBMChIU/hvIv6nbDo9UpXr8qKbFUPq"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-solid-900.woff2",
+        "sha384": "sha384-77y8nNGW9eYPJKjLxoeFrOIkHDBkRk9yWR1JHddn++xVgG4hAQIyuDbKcPV/Cjh5"
+      },
+      {
+        "path": "font-awesome/webfonts/fa-v4compatibility.woff2",
+        "sha384": "sha384-Uy/KccGyZLu1jwi6YCDR9/POuHg5TwhzCxLClb5wnGswbKJAibUvdHlrv0ixldrp"
+      },
+      {
+        "path": "font-awesome/LICENSE",
+        "sha384": "sha384-d9j8W38zBz51HJF7nOlshkGdC2zRSf6Z71XhxX26gsZ2bex584+oqnWbi/yz/Jxj"
+      }
+    ]
+  }
+]

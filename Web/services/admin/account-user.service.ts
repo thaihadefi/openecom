@@ -3,6 +3,7 @@ import AccountUser from '../../models/account-user.model';
 import UserAddress from '../../models/user-address.model';
 import ChatRoom from '../../models/chat-room.model';
 import Review from '../../models/review.model';
+import Product from '../../models/product.model';
 import ChatMessage from '../../models/chat-message.model';
 import RefreshToken from '../../models/refresh-token.model';
 import { fmDeleteFolder } from '../../helpers/file-manager.client';
@@ -63,6 +64,26 @@ export const restoreManyUserAccounts = (ids: string[]) => {
   return restoreMany(AccountUser, ids, "user");
 };
 
+const deleteUserReviews = async (userIds: string[], session: mongoose.ClientSession) => {
+  const userFilter = { userId: { $in: userIds } };
+  const productIds: string[] = await Review.distinct("productId", userFilter).session(session);
+  await Review.deleteMany(userFilter, { session });
+  if (productIds.length === 0) return;
+
+  const remaining = await Review.aggregate<{ _id: string; count: number; avg: number }>([
+    { $match: { productId: { $in: productIds } } },
+    { $group: { _id: "$productId", count: { $sum: 1 }, avg: { $avg: "$rating" } } }
+  ]).session(session);
+  const stats = new Map(remaining.map(item => [String(item._id), item]));
+  for (const productId of productIds) {
+    const stat = stats.get(String(productId));
+    await Product.updateOne({ _id: productId }, {
+      ratingCount: stat?.count || 0,
+      ratingAvg: stat?.avg || 0
+    }, { session });
+  }
+};
+
 export const permanentlyDeleteUserAccount = async (id: string) => {
   const userId = String(id);
   const rooms = await ChatRoom.find({ userId }).select("_id adminId userId");
@@ -70,14 +91,13 @@ export const permanentlyDeleteUserAccount = async (id: string) => {
   const session = await mongoose.startSession();
   try {
     await session.withTransaction(async () => {
-      await Promise.all([
-        AccountUser.deleteOne({ _id: userId }, { session }),
-        UserAddress.deleteMany({ userId }, { session }),
-        ChatRoom.deleteMany({ userId }, { session }),
-        Review.deleteMany({ userId }, { session }),
-        ChatMessage.deleteMany({ roomId: { $in: rooms.map((room) => room._id.toString()) } }, { session }),
-        RefreshToken.deleteMany({ userId, role: "user" }, { session }),
-      ]);
+      // A MongoDB session must execute transaction operations sequentially.
+      await AccountUser.deleteOne({ _id: userId }, { session });
+      await UserAddress.deleteMany({ userId }, { session });
+      await ChatRoom.deleteMany({ userId }, { session });
+      await deleteUserReviews([userId], session);
+      await ChatMessage.deleteMany({ roomId: { $in: rooms.map((room) => room._id.toString()) } }, { session });
+      await RefreshToken.deleteMany({ userId, role: "user" }, { session });
     });
   } finally {
     session.endSession();
@@ -107,14 +127,12 @@ export const permanentlyDeleteManyUserAccounts = async (ids: string[]) => {
   const session = await mongoose.startSession();
   try {
     await session.withTransaction(async () => {
-      const [deleted] = await Promise.all([
-        AccountUser.deleteMany({ _id: { $in: ids } }, { session }),
-        UserAddress.deleteMany({ userId: { $in: userIds } }, { session }),
-        ChatRoom.deleteMany({ userId: { $in: userIds } }, { session }),
-        Review.deleteMany({ userId: { $in: userIds } }, { session }),
-        ChatMessage.deleteMany({ roomId: { $in: rooms.map((room) => room._id.toString()) } }, { session }),
-        RefreshToken.deleteMany({ userId: { $in: userIds }, role: "user" }, { session }),
-      ]);
+      const deleted = await AccountUser.deleteMany({ _id: { $in: ids } }, { session });
+      await UserAddress.deleteMany({ userId: { $in: userIds } }, { session });
+      await ChatRoom.deleteMany({ userId: { $in: userIds } }, { session });
+      await deleteUserReviews(userIds, session);
+      await ChatMessage.deleteMany({ roomId: { $in: rooms.map((room) => room._id.toString()) } }, { session });
+      await RefreshToken.deleteMany({ userId: { $in: userIds }, role: "user" }, { session });
       deletedCount = deleted.deletedCount;
     });
   } finally {

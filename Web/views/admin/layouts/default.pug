@@ -30,13 +30,13 @@ html(
       http-equiv="X-UA-Compatible"
       )
     link(
-      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.ico'}`
+      href=`${settingGeneral && settingGeneral.favicon ? domainCDN + settingGeneral.favicon : '/images/favicon.svg'}`
       rel="shortcut icon"
       )
-    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.css" integrity="sha384-snpJ3knpH6avB6cP1vPkNdmRzCYaCpom/3TNOyvo189BiogXYXQfXkyYpZ2/xADs" crossorigin="anonymous")
+    link(rel="stylesheet", href="/admin/assets/libs/notyf/notyf.min.css" integrity="sha384-snpJ3knpH6avB6cP1vPkNdmRzCYaCpom/3TNOyvo189BiogXYXQfXkyYpZ2/xADs" crossorigin="anonymous")
     link(href="/admin/assets/libs/uppy/uppy.min.css" rel="stylesheet")
-    link(rel="stylesheet", href="https://unpkg.com/mobius1-selectr@2.4.13/dist/selectr.min.css" integrity="sha384-O1PAcYRxlWavYIL+m80+1ZJEeTsz7WNgQ2OuONoGg4dgLExWaGMPQXVs5hlSbNIE" crossorigin="anonymous")
-    link(href="https://cdn.jsdelivr.net/npm/jsoneditor@10.4.2/dist/jsoneditor.min.css" integrity="sha384-cj1rYBc4/dVYAknZMTkVCDRL6Knzugf32igVqsuFW0iRWFHKH8Ci8+ekC8gNsFZ+" crossorigin="anonymous" rel="stylesheet")
+    link(rel="stylesheet", href="/admin/assets/libs/selectr/selectr.min.css" integrity="sha384-O1PAcYRxlWavYIL+m80+1ZJEeTsz7WNgQ2OuONoGg4dgLExWaGMPQXVs5hlSbNIE" crossorigin="anonymous")
+    link(href="/admin/assets/libs/jsoneditor/jsoneditor.min.css" integrity="sha384-cj1rYBc4/dVYAknZMTkVCDRL6Knzugf32igVqsuFW0iRWFHKH8Ci8+ekC8gNsFZ+" crossorigin="anonymous" rel="stylesheet")
     link(
       type="text/css"
       rel="stylesheet"
@@ -59,7 +59,7 @@ html(
       )
     link(
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous"
+      href="/admin/assets/libs/font-awesome/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous"
       )
     link(
       type="text/css"
@@ -80,14 +80,14 @@ html(
     include ../partials/modal-file-manager.pug
     include ../partials/modal-confirm.pug
 
-    script(src="https://unpkg.com/just-validate@4.3.0/dist/just-validate.production.min.js" integrity="sha384-MTEqTcTyVLHVQNcumujWT8ThfE2tAm0jR8FP+YSLHn3KRydBdxTYaiK9USgsaU5e" crossorigin="anonymous")
-    script(src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js" integrity="sha384-uuNfwJfjOG2ukYi4eAB11/t3lP4Zjf75a3UhgkLzEpiX8JpJfacpG7Ye+0tiVMxT" crossorigin="anonymous")
+    script(src="/admin/assets/libs/just-validate/just-validate.production.min.js" integrity="sha384-MTEqTcTyVLHVQNcumujWT8ThfE2tAm0jR8FP+YSLHn3KRydBdxTYaiK9USgsaU5e" crossorigin="anonymous")
+    script(src="/admin/assets/libs/notyf/notyf.min.js" integrity="sha384-uuNfwJfjOG2ukYi4eAB11/t3lP4Zjf75a3UhgkLzEpiX8JpJfacpG7Ye+0tiVMxT" crossorigin="anonymous")
     script(src="/admin/assets/libs/tinymce/tinymce.min.js")
     script(src="/admin/assets/libs/bootstrap/js/bootstrap.bundle.min.js")
     script(src="/admin/assets/libs/simplebar/simplebar.min.js")
-    script(src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" integrity="sha384-HZZ/fukV+9G8gwTNjN7zQDG0Sp7MsZy5DDN6VfY3Be7V9dvQpEpR2jF2HlyFUUjU" crossorigin="anonymous")
-    script(src="https://unpkg.com/mobius1-selectr@2.4.13/dist/selectr.min.js" integrity="sha384-kpRfuhIjTUhRJPetumAT2UykEKnqXdurw75vUs2015lqpEhsRfkoOF/gMcrWr02F" crossorigin="anonymous")
-    script(src="https://cdn.jsdelivr.net/npm/jsoneditor@10.4.2/dist/jsoneditor.min.js" integrity="sha384-Om1Bp2exFp3Ll1dmNKTYPF4wSgGsZu1bXp+oe9yLEg58FKqabAAfDsNoW+qxuH1+" crossorigin="anonymous")
+    script(src="/admin/assets/libs/sortablejs/Sortable.min.js" integrity="sha384-HZZ/fukV+9G8gwTNjN7zQDG0Sp7MsZy5DDN6VfY3Be7V9dvQpEpR2jF2HlyFUUjU" crossorigin="anonymous")
+    script(src="/admin/assets/libs/selectr/selectr.min.js" integrity="sha384-kpRfuhIjTUhRJPetumAT2UykEKnqXdurw75vUs2015lqpEhsRfkoOF/gMcrWr02F" crossorigin="anonymous")
+    script(src="/admin/assets/libs/jsoneditor/jsoneditor.min.js" integrity="sha384-Om1Bp2exFp3Ll1dmNKTYPF4wSgGsZu1bXp+oe9yLEg58FKqabAAfDsNoW+qxuH1+" crossorigin="anonymous")
     block script
     script(src="/admin/assets/libs/vanillajs-datepicker/js/datepicker-full.min.js")
     script(src=`/admin/assets/js/app.js?v=${assetVersion || 0}`)

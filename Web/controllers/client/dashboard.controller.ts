@@ -270,7 +270,7 @@ export const orderReview = async (req: Request, res: Response) => {
 
     const orderDetail = await dashboardService.getOrderReviewData(userId, orderId);
 
-    if (!orderDetail) {
+    if (!orderDetail || orderDetail.orderStatus !== "completed") {
       res.redirect('/dashboard/order/list');
       return;
     }

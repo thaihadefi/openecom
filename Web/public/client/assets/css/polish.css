@@ -3328,6 +3328,8 @@ footer, .footer_main {
 
 .main_menu .menu_icon { gap: 6px !important; }
 .main_menu .menu_icon li a.user b { width: 38px !important; height: 38px !important; }
+/* Customer photos keep their own colors; the theme filter is for menu icons. */
+.main_menu_2 .menu_icon li a.user b img[profile-photo-preview] { filter: none; }
 
 .blog_item {
     background: var(--surface) !important; border: 1px solid var(--line) !important; border-radius: 0 !important; box-shadow: none !important;
@@ -4820,4 +4822,11 @@ main#main-content > .page_breadcrumb + section { padding-top: 0 !important; }
 @media (max-width: 767.98px) {
     .details_slider_nav:not(.slick-initialized) { display: flex; flex-wrap: nowrap; overflow: hidden; }
     .details_slider_nav:not(.slick-initialized) > * { flex: 0 0 auto; width: auto; }
+}
+
+/* Profile values must not inherit the template's fixed-width label styling. */
+.dashboard_profile_info_list ul li { display: grid; grid-template-columns: minmax(0, 110px) minmax(0, 1fr); gap: 12px; }
+.dashboard_profile_info_list ul li > span { width: auto; overflow-wrap: anywhere; }
+@media (max-width: 575px) {
+  .dashboard_profile_info_list ul li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 }

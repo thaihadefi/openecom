@@ -120,19 +120,23 @@ document.querySelectorAll('[data-date-filter]').forEach(function(form) {
 
 const showConfirm = ({ title = "Delete", message = "This action cannot be undone.", okText = "Delete", okClass = "btn-danger", onOk }) => {
   const modal = document.querySelector("#modalConfirm");
-  if(!modal) { if(confirm(message)) onOk(); return; }
+  if (!modal || typeof bootstrap === "undefined") {
+    notyf.error("Confirmation is unavailable. Please reload the page.");
+    return;
+  }
   document.getElementById("modalConfirmTitle").textContent = title;
   document.getElementById("modalConfirmMessage").textContent = message;
-  const okBtn = document.getElementById("modalConfirmOk");
+  const previousOk = document.getElementById("modalConfirmOk");
+  const okBtn = previousOk.cloneNode(true);
+  previousOk.replaceWith(okBtn);
   okBtn.textContent = okText;
   okBtn.className = `btn px-4 ${okClass}`;
-  const bsModal = new bootstrap.Modal(modal);
+  const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
   const handler = () => {
     bsModal.hide();
     okBtn.removeEventListener("click", handler);
     onOk();
   };
-  okBtn.removeEventListener("click", handler);
   okBtn.addEventListener("click", handler);
   bsModal.show();
 }
@@ -438,7 +442,6 @@ if(modalPreviewFile) {
 const modalChangeFileName = document.querySelector("#modalChangeFileName");
 if(modalChangeFileName) {
   const form = modalChangeFileName.querySelector("form");
-  let buttonClicked = null;
 
   const INVALID_FILE_CHARS = /[/\\:*?"<>|]/;
 
@@ -479,20 +482,19 @@ if(modalChangeFileName) {
     });
 
   document.querySelectorAll("[button-change-file-name]").forEach(button => {
-    button.addEventListener("click", () => { buttonClicked = button; });
+    button.addEventListener("click", () => {
+      // Populate before the modal opens so its animation cannot overwrite typing.
+      form.fileFolder.value = button.getAttribute("data-file-folder");
+      form.oldFileName.value = button.getAttribute("data-file-name");
+      form.newFileName.value = form.oldFileName.value;
+    });
   });
 
   modalChangeFileName.addEventListener('shown.bs.modal', () => {
-    const folder = buttonClicked.getAttribute("data-file-folder");
-    const fileName = buttonClicked.getAttribute("data-file-name");
-    form.fileFolder.value = folder;
-    form.oldFileName.value = fileName;
-    form.newFileName.value = fileName;
     form.querySelector('#newFileName').select();
   });
 
   modalChangeFileName.addEventListener('hidden.bs.modal', () => {
-    buttonClicked = null;
     form.fileFolder.value = "";
     form.oldFileName.value = "";
     form.newFileName.value = "";
@@ -883,27 +885,46 @@ if(listFormMultiFile.length > 0) {
   })
 }
 
+const fileManagerModal = document.querySelector("#modalFileManager");
+let fileManagerOpening = false;
+let fileManagerClosePending = false;
+const closeFileManager = () => {
+  if (!fileManagerModal) return;
+  if (fileManagerOpening) {
+    fileManagerClosePending = true;
+    return;
+  }
+  bootstrap.Modal.getInstance(fileManagerModal)?.hide();
+};
+fileManagerModal?.addEventListener("show.bs.modal", () => {
+  fileManagerOpening = true;
+  fileManagerClosePending = false;
+});
+fileManagerModal?.addEventListener("shown.bs.modal", () => {
+  fileManagerOpening = false;
+  if (fileManagerClosePending) {
+    fileManagerClosePending = false;
+    closeFileManager();
+  }
+});
+fileManagerModal?.addEventListener("hidden.bs.modal", () => {
+  fileManagerOpening = false;
+  fileManagerClosePending = false;
+});
+
 window.addEventListener("message", (event) => {
   if(event.origin !== window.location.origin) return;
   if(!event.data || typeof event.data.fileLink !== "string" || !event.data.fileLink) return;
 
-  const closeModal = () => {
-    const modal = document.querySelector("#modalFileManager");
-    if(modal) {
-      const bsModal = bootstrap.Modal.getInstance(modal);
-      if(bsModal) bsModal.hide();
-    }
-  };
-
   if(window.activeTinyMCECallback) {
     const link = `${domainCDN}${event.data.fileLink}`;
     window.activeTinyMCECallback(link);
-    closeModal();
+    closeFileManager();
     window.activeTinyMCECallback = null;
   } else if(activeInputFile) {
     activeInputFile.value = event.data.fileLink;
     activeInputFile.dispatchEvent(new Event("input"));
-    closeModal();
+    closeFileManager();
     activeInputFile = null;
   } else if(activeMultiFileList) {
     const link = event.data.fileLink;
@@ -913,7 +934,7 @@ window.addEventListener("message", (event) => {
         <span class="inner-remove">x</span>
       </div>
     `);
-    closeModal();
+    closeFileManager();
     activeMultiFileList = null;
   }
 })
