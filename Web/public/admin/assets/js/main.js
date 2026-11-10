@@ -323,7 +323,7 @@ if(listButtonApi.length > 0) {
 
       const isDeleteAction = method === "DELETE" || api.includes("/delete/") || api.includes("/destroy/");
       if (isDeleteAction) {
-        const isPermanent = method === "DELETE" || api.includes("/destroy/");
+        const isPermanent = button.getAttribute("data-confirm") !== "trash" && (method === "DELETE" || api.includes("/destroy/"));
         showConfirm({
           title: isPermanent ? "Delete Permanently" : "Move to Trash",
           message: isPermanent ? "This action cannot be undone. Are you sure?" : "Move this item to trash?",
