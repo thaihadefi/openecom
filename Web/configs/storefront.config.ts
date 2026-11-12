@@ -34,8 +34,8 @@ export interface ProductPromise {
 }
 
 export const STOREFRONT_DEFAULTS: StorefrontSettings = {
-  primaryColor: "#0057B7",
-  secondaryColor: "#FFD700",
+  primaryColor: "#1C1917",
+  secondaryColor: "#A16207",
   headingFont: "",
   bodyFont: "",
   currency: "VND",

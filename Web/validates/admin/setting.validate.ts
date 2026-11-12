@@ -9,7 +9,7 @@ import { parseCurrencyList } from "../../configs/storefront.config";
 const text = (max = 500) => Joi.string().trim().max(max).allow("");
 // A non-negative number; an empty field clears it.
 const amount = (max = 1e12) => Joi.alternatives().try(Joi.number().min(0).max(max), Joi.string().valid(""));
-const hexColor = () => Joi.string().trim().pattern(/^#[0-9a-fA-F]{6}$/).messages({ "string.pattern.base": "Colors must look like #0057B7!" });
+const hexColor = () => Joi.string().trim().pattern(/^#[0-9a-fA-F]{6}$/).messages({ "string.pattern.base": "Colors must look like #1C1917!" });
 const fontName = () => Joi.string().trim().max(60).pattern(/^[A-Za-z0-9 ]*$/).allow("").messages({ "string.pattern.base": "Font names may contain letters, digits and spaces only!" });
 const isCurrency = (code: string) => {
   try {
