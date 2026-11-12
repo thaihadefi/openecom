@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Order from "../models/order.model";
 import { ONLINE_PAYMENT_METHOD_IDS } from "../configs/payment-methods.config";
 import { releaseOrderResources, notifyOrderStatusChange } from "../helpers/order.helper";
+import { cancelOrderShipment } from "../services/shipping/shipping.service";
 import { invalidateAdminDashboardCaches } from "../services/admin/dashboard.service";
 import { invalidateUserAuthCache } from "../services/client/auth.service";
 import { invalidateUserDashboardCache } from "../services/client/dashboard.service";
@@ -18,7 +19,7 @@ export const autoCancelUnpaidOrders = () => {
       orderStatus: "pending",
       deleted: false,
       createdAt: { $lt: threshold }
-    }).select("_id code items userId usedPoint pointEarned coupon");
+    }).select("_id code items userId usedPoint pointEarned coupon shipping");
 
     if (staleOrders.length === 0) return;
 
@@ -45,6 +46,7 @@ export const autoCancelUnpaidOrders = () => {
 
         if (cancelled) {
           notifyOrderStatusChange(order, "cancelled");
+          void cancelOrderShipment(order.shipping);
           if (order.userId) {
             invalidateUserAuthCache(order.userId);
             invalidateUserDashboardCache(order.userId);

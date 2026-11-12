@@ -2,6 +2,7 @@ import { getApiShipping, getGeneral } from "../../configs/setting.config";
 import { SHIPPING_CONFIG } from "../../configs/shipping.config";
 import { httpError } from "../../helpers/http-response.helper";
 import { goshipProvider } from "./goship.provider";
+import { IOrderShipping } from "../../interfaces/models/order.interface";
 import { ShipmentInput, ShipmentResult, ShippingContext, ShippingProvider, ShippingQuoteInput, ShippingRate } from "./shipping-provider";
 
 // Shipping providers the store ships with. To add one for a client: implement ShippingProvider
@@ -46,6 +47,25 @@ export const createShipment = async (rateId: string, input: Omit<ShipmentInput, 
   const provider = enabledShippingProviders(ctx).find((p) => p.id === providerId);
   if (!provider) throw httpError(400, "Please select a shipping method again.");
   return provider.createShipment({ ...input, rateId: rateId.slice(separator + 1) }, ctx);
+};
+
+// Cancels the shipment an order booked, when its provider can. Best effort: a failure is logged for
+// staff to cancel with the carrier, and never blocks the order flow that called it.
+export const cancelOrderShipment = async (shipping: IOrderShipping | undefined, ctx?: ShippingContext): Promise<boolean> => {
+  // Orders placed before providers were pluggable keep the GoShip code in goshipOrderId.
+  const externalId = shipping?.externalId || shipping?.goshipOrderId;
+  if (!externalId) return false;
+  const providerId = shipping?.provider || (shipping?.goshipOrderId ? "goship" : "");
+  const provider = SHIPPING_PROVIDERS.find((p) => p.id === providerId);
+  if (!provider?.cancelShipment) return false;
+  try {
+    await provider.cancelShipment(externalId, ctx ?? await getShippingContext());
+    return true;
+  } catch (error: unknown) {
+    console.error(`[Shipping] Could not cancel ${providerId} shipment ${externalId}; cancel it with the carrier:`,
+      error instanceof Error ? error.message : error);
+    return false;
+  }
 };
 
 // Grams per unit: the product's own weight, else the store default.

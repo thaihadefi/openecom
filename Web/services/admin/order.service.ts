@@ -8,6 +8,7 @@ import { getPagination } from '../../helpers/pagination.helper';
 import { buildKeywordFilter } from '../../helpers/list-query.helper';
 import { softDeleteMany, restoreMany, permanentlyDeleteMany, getTrash } from "../../helpers/admin-crud.helper";
 import { releaseOrderResources, notifyOrderStatusChange } from "../../helpers/order.helper";
+import { cancelOrderShipment } from "../shipping/shipping.service";
 import { invalidateUserAuthCache } from "../client/auth.service";
 import { invalidateUserDashboardCache } from "../client/dashboard.service";
 import { invalidateAdminDashboardCaches } from "./dashboard.service";
@@ -134,6 +135,8 @@ export const updateOrderAdmin = async (
 
   if (state.statusChanged) {
     notifyOrderStatusChange(order, orderStatus);
+    // A cancelled order no longer ships; a returned one was already delivered.
+    if (orderStatus === "cancelled") void cancelOrderShipment(order.shipping);
   }
 
   return { success: true, message: "Order updated successfully!", order };

@@ -116,7 +116,7 @@ Where each kind of client request goes; most need no code.
 | Offer Google or Facebook login | Admin → Settings → Social Login API (buttons appear once keys are saved) | None |
 | Move the admin panel to another URL | `ADMIN_PATH` in `Web/.env` | None |
 | Add a payment gateway (e.g. SePay, MoMo) | See [Adding a payment gateway](#adding-a-payment-gateway) | Small |
-| Add a shipping carrier | One `ShippingProvider` file like [goship.provider.ts](Web/services/shipping/goship.provider.ts), listed in [shipping.service.ts](Web/services/shipping/shipping.service.ts) | Small |
+| Add a shipping carrier | One `ShippingProvider` file like [goship.provider.ts](Web/services/shipping/goship.provider.ts), listed in [shipping.service.ts](Web/services/shipping/shipping.service.ts); implement its optional `cancelShipment` so cancelled orders release the booking | Small |
 | Add a module of their own | Routes behind `requireFeature(...)` ([feature.middleware.ts](Web/middlewares/feature.middleware.ts)), a flag in [features.config.ts](Web/configs/features.config.ts) | Yes |
 | Replace the storefront design | Pug views in `Web/views/client`, keeping the CSS variables and the element attributes that `main.js` hooks into; a fully separate frontend can use the [JSON API](#api-documentation) instead | Yes |
 
@@ -200,6 +200,7 @@ Recommendations and the fraud model are recomputed every night and can also be r
 
 - The cart lives in the browser, so the server re-checks every price, variant and stock level when the order is placed.
 - Stock is reserved when an order is placed. Cancelling or returning an order gives back the stock, the coupon use and the spent points, and takes back the points it earned. These changes run inside a MongoDB transaction.
+- The shipment is booked with the carrier when the order is placed. It is cancelled with the carrier when the order then fails to save, when staff cancel the order and when an unpaid online order times out; if the carrier refuses, the error is logged for staff to cancel by hand.
 - Points can pay part of an order, up to the customer's balance and the amount due.
 - Loyalty points are earned only once an order is paid, never for cancelled or returned orders. How much order value earns a point, and what a point is worth, are set in Settings → Storefront.
 - Completed, cancelled and returned orders can no longer change status, and a paid order cannot be set back to unpaid; only cancelled or returned orders can be deleted.
@@ -284,7 +285,7 @@ Search engines and AI assistants read the store from the same data the pages sho
 
 Each service defines its scripts in its own `package.json`; run them with `yarn <script>` inside `Web` or `FileManager`. Before pushing:
 
-- `yarn typecheck`, `yarn lint:any` (no `any` types) and `yarn build`. [CI](.github/workflows/ci.yml) runs these and builds each service's Docker image on every push and pull request to `main`. On a push to `main`, its last job deploys that same commit to the VPS over SSH, and only after both services pass.
+- `yarn typecheck`, `yarn lint:any` (no `any` types), `yarn test` (unit tests in `Web/tests`, Web only) and `yarn build`. [CI](.github/workflows/ci.yml) runs these and builds each service's Docker image on every push and pull request to `main`. On a push to `main`, its last job deploys that same commit to the VPS over SSH, and only after both services pass.
 - When a route, method or payload changes, update the [API spec](#api-documentation) and run `yarn verify` in its repository; it compares the spec with this code.
 - When a setting gains a field, give it a default in [seed.ts](Web/seed.ts) so `yarn db:seed` fills it on existing stores.
 

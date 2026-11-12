@@ -7,7 +7,7 @@ import Coupon from '../../models/coupon.model';
 import { checkCouponValidity, couponRejectStatus } from './coupon.service';
 import AccountUser from '../../models/account-user.model';
 import { getApiPayment } from '../../configs/setting.config';
-import { createShipment, getShippingContext, unitWeight } from '../shipping/shipping.service';
+import { cancelOrderShipment, createShipment, getShippingContext, unitWeight } from '../shipping/shipping.service';
 import { caughtErrorStatus, isExposed } from '../../helpers/http-response.helper';
 import { enabledPaymentMethods } from '../../configs/payment-methods.config';
 import { getStorefront, toMoney } from '../../configs/storefront.config';
@@ -425,6 +425,10 @@ export const createOrder = async (
       }
     });
   } catch (error: unknown) {
+    // The shipment was booked before the transaction. Release it unless the order was saved after all:
+    // withTransaction can throw when a commit's outcome is unknown even though it succeeded.
+    const committed = savedOrderId ? await Order.exists({ _id: savedOrderId }).catch(() => null) : null;
+    if (!committed) await cancelOrderShipment(dataFinal.shipping, shippingCtx);
     const customErr = error as { code?: string; status?: number; message?: string };
     if (customErr?.code === "out_of_stock") {
       return { success: false, status: customErr.status ?? 409, message: customErr.message || "One or more items are out of stock!" };

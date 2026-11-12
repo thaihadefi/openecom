@@ -67,4 +67,6 @@ export interface ShippingProvider {
   /** Rates with the provider's own ids; the service prefixes them with the provider id */
   getRates(input: ShippingQuoteInput, ctx: ShippingContext): Promise<Array<Omit<ShippingRate, "provider">>>;
   createShipment(input: ShipmentInput, ctx: ShippingContext): Promise<ShipmentResult>;
+  /** Cancels a booked shipment by the provider's own id. Optional: without it, staff cancel with the carrier. */
+  cancelShipment?(externalId: string, ctx: ShippingContext): Promise<void>;
 }

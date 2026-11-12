@@ -127,5 +127,11 @@ export const goshipProvider: ShippingProvider = {
       fee: res.data.fee,
       cod: res.data.cod
     };
+  },
+
+  // DELETE /shipments/{id}, where id is the GoShip shipment code returned when it was booked.
+  async cancelShipment(externalId, ctx) {
+    const res = await axios.delete(`${apiBase(ctx)}/shipments/${encodeURIComponent(externalId)}`, { headers: authHeaders(ctx) });
+    if (res.data?.status && res.data.status !== "success") throw new Error(`GoShip refused: ${JSON.stringify(res.data)}`);
   }
 };
