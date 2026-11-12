@@ -42,10 +42,9 @@ export const getCategoryBlogList = async (rawKeyword?: unknown, rawPage?: unknow
     }
   }
 
-  const categoryTree = buildCategoryTree(recordList);
-
   return {
-    categoryTree
+    recordList,
+    pagination
   };
 };
 
