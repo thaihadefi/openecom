@@ -502,7 +502,7 @@ if(formSearch) {
             <div class="inner-name">${highlight(item.name, keyword)}</div>
             <div class="inner-prices">
               <div class="inner-price-new">${formatMoney(item.priceNew || 0)}</div>
-              ${item.priceOld ? `<div class="inner-price-old">${formatMoney(item.priceOld)}</div>` : ""}
+              ${item.priceOld > (item.priceNew || 0) ? `<div class="inner-price-old">${formatMoney(item.priceOld)}</div>` : ""}
               ${(item.stock ?? 0) <= 0 ? `<div class="inner-stock-out">Out of stock</div>` : ""}
             </div>
           </div>
@@ -1068,7 +1068,7 @@ const drawCart = () => {
                   </a>
                   <p>
                     ${formatMoney(priceNew)}
-                    <del>${formatMoney(priceOld)}</del>
+                    ${priceOld > priceNew ? `<del>${formatMoney(priceOld)}</del>` : ""}
                   </p>
                   <span>
                     <b>Quantity:</b> ${item.quantity}
@@ -1101,7 +1101,7 @@ const drawCart = () => {
                   <a class="title" href="/product/detail/${esc(detail.slug)}">${esc(detail.name)}</a>
                   <p>
                     ${formatMoney(priceNew)}
-                    <del>${formatMoney(priceOld)}</del>
+                    ${priceOld > priceNew ? `<del>${formatMoney(priceOld)}</del>` : ""}
                   </p>
                   ${htmlVariant}
                 </td>
@@ -1912,7 +1912,7 @@ const drawComparePage = () => {
               <td>
                 <p>
                   ${formatMoney(priceNew)}
-                  <del>${formatMoney(priceOld)}</del>
+                  ${priceOld > priceNew ? `<del>${formatMoney(priceOld)}</del>` : ""}
                 </p>
               </td>
             `;
@@ -2187,7 +2187,7 @@ const drawWishlistPage = () => {
                   <a class="title" href="/product/detail/${esc(detail.slug)}">${esc(detail.name)}</a>
                   <p>
                     ${formatMoney(priceNew)}
-                    <del>${formatMoney(priceOld)}</del>
+                    ${priceOld > priceNew ? `<del>${formatMoney(priceOld)}</del>` : ""}
                   </p>
                   ${htmlVariant}
                 </td>

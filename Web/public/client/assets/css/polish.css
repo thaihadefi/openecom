@@ -3045,6 +3045,12 @@ section.category { margin-top: 64px !important; }
 .sidebar_related_product .related_product_item {
     margin-bottom: 0 !important;
 }
+/* Full product cards in the sidebar: the legacy `.sidebar_related_product ul` column layout
+   must not stack the card's color swatches. */
+.sidebar_related_product .related_product_item ul.color {
+    flex-direction: row;
+    gap: 5px;
+}
 @media (max-width: 991.98px) {
     .sidebar_related_product .related_product_list {
         display: grid !important;
