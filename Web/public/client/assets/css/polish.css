@@ -4623,8 +4623,8 @@ header.header_main .topbar_right .gtranslate_wrapper .gt_option a:hover {
 
 
 /* Text on the store's theme colors follows their brightness (--onThemeColor* is set per store in the layout),
-   so a light secondary color such as yellow gets dark text. */
-.main_menu_2 .menu_icon li a span:not([mini-cart-quantity]),
+   so a light secondary color such as yellow gets dark text. The "Account" label sits on the plain header, not on a theme color. */
+.main_menu_2 .menu_icon li a span:not([mini-cart-quantity]):not(.menu_label),
 .details_variant_size li:hover,
 .details_variant_size li.active {
     color: var(--onThemeColorTwo, var(--colorWhite)) !important;
