@@ -12,6 +12,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
+    "test": "node --require ts-node/register/transpile-only --test tests/*.test.ts",
     "db:seed": "ts-node seed.ts",
     "db:search-index": "ts-node search-index.ts",
     "lint:any": "bash -c '! grep -rn --include=\"*.ts\" --exclude-dir={node_modules,dist} \": any\\b\" .'"

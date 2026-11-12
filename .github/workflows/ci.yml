@@ -40,6 +40,9 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn typecheck
       - run: yarn lint:any
+      - name: Unit tests
+        if: matrix.service == 'Web'
+        run: yarn test
       - run: yarn build
 
       # Deploys run through docker compose, so the image must build too.
