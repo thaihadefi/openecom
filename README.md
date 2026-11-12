@@ -284,7 +284,7 @@ Search engines and AI assistants read the store from the same data the pages sho
 
 Each service defines its scripts in its own `package.json`; run them with `yarn <script>` inside `Web` or `FileManager`. Before pushing:
 
-- `yarn typecheck`, `yarn lint:any` (no `any` types) and `yarn build`. [CI](.github/workflows/ci.yml) runs these and builds each service's Docker image on every push and pull request to `main`.
+- `yarn typecheck`, `yarn lint:any` (no `any` types) and `yarn build`. [CI](.github/workflows/ci.yml) runs these and builds each service's Docker image on every push and pull request to `main`. On a push to `main`, its last job deploys that same commit to the VPS over SSH, and only after both services pass.
 - When a route, method or payload changes, update the [API spec](#api-documentation) and run `yarn verify` in its repository; it compares the spec with this code.
 - When a setting gains a field, give it a default in [seed.ts](Web/seed.ts) so `yarn db:seed` fills it on existing stores.
 

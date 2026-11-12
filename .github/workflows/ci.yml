@@ -9,10 +9,11 @@ on:
 permissions:
   contents: read
 
-# A newer push to the same branch or PR cancels the run it replaces.
+# A newer push to a PR cancels the run it replaces. Runs on main are never cancelled midway,
+# because their last job deploys to production.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -44,3 +45,29 @@ jobs:
       # Deploys run through docker compose, so the image must build too.
       - name: Build Docker image
         run: docker build .
+
+  # Deploys only after every verify job passed, and only the commit that was verified.
+  deploy:
+    name: Deploy to VPS
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            set -e
+            cd /root/openecom
+            git fetch origin main
+            git reset --hard ${{ github.sha }}
+            docker compose up -d --build
+            docker image prune -f
