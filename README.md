@@ -279,6 +279,7 @@ Search engines and AI assistants read the store from the same data the pages sho
 - **File paths:** FileManager resolves every path inside its media folder and rejects anything that would leave it.
 - **Uploads** are checked by type and size; avatars and review photos must be real images. The limits live in [upload.helper.ts](Web/helpers/upload.helper.ts) and [FileManager/config](FileManager/config).
 - **Redeploys:** the web app shuts down gracefully on `SIGTERM` ([Web/index.ts](Web/index.ts)), and Compose gives it time to finish (`stop_grace_period`).
+- **A proxy in front of Compose** (for example the host's nginx that serves the domain and forwards to port 8030) must allow uploads as large as the app does: set `client_max_body_size 200M;` in its `server` block, as [nginx/nginx.conf](nginx/nginx.conf) does. Its default of 1 MB refuses larger product images and avatars with HTTP 413 before they reach the app.
 - **nginx config** is mounted as a directory; after editing `nginx/nginx.conf`, run `docker compose exec nginx nginx -s reload`.
 
 ## Development

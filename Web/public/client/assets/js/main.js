@@ -2917,6 +2917,11 @@ if (profilePhoto) {
     profilePhoto.setAttribute("aria-busy", "true");
     try {
       const response = await fetch("/api/customers/me/avatar", { method: "PUT", body: formData });
+      // A proxy in front of the app may refuse a large upload with an HTML page, not JSON.
+      if (response.status === 413) {
+        notyf.error("This image is too large for the server. Please choose a smaller one.");
+        return;
+      }
       const data = await response.json();
       if (!response.ok || data.code !== "success" || !data.linkAvatar) {
         notyf.error(data.message || "Could not update profile photo!");
