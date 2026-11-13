@@ -6,7 +6,7 @@
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-A customizable e-commerce baseline: one codebase, configured per client instead of forked.
+An open-source e-commerce baseline for Vietnamese SMEs: one codebase, configured per client instead of forked. Vietnamese payments (VNPay, ZaloPay) and shipping (GoShip) are built in.
 
 Every store gets a storefront, an admin panel and a JSON API. For a new client you switch modules on or off, set the look, currency and page content in the admin panel, and plug in payment gateways or shipping carriers through small interfaces. [Customizing for a client](#customizing-for-a-client) shows where each kind of request goes.
 
@@ -156,8 +156,8 @@ The store **locale** sets number and date formats, and the map address search lo
 
 ### Limitations
 
-- UI and email text is in English in the code (Pug views, [mail.helper.ts](Web/helpers/mail.helper.ts)); Google Translate covers other languages on the storefront.
-- Shipping uses GoShip, so stores ship within Vietnam, and customer phone numbers must be Vietnamese mobile numbers ([auth.validate.ts](Web/validates/client/auth.validate.ts)).
+- UI and email text is in English in the code (Pug views, [mail.helper.ts](Web/helpers/mail.helper.ts)); a multi-language interface is planned, and Google Translate covers other languages on the storefront for now.
+- The baseline targets stores in Vietnam: shipping uses GoShip, and customer phone numbers must be Vietnamese mobile numbers ([auth.validate.ts](Web/validates/client/auth.validate.ts)). Selling abroad needs another payment gateway and shipping provider (see [Customizing for a client](#customizing-for-a-client)).
 
 ### Setting up a new client store
 
@@ -200,7 +200,7 @@ Recommendations and the fraud model are recomputed every night and can also be r
 
 - The cart lives in the browser, so the server re-checks every price, variant and stock level when the order is placed.
 - Stock is reserved when an order is placed. Cancelling or returning an order gives back the stock, the coupon use and the spent points, and takes back the points it earned. These changes run inside a MongoDB transaction.
-- The shipment is booked with the carrier when the order is placed. It is cancelled with the carrier when the order then fails to save, when staff cancel the order and when an unpaid online order times out; if the carrier refuses, the error is logged for staff to cancel by hand.
+- The shipment is booked with the carrier when the order is placed. It is cancelled with the carrier when the order then fails to save, when staff cancel the order and when an unpaid online order times out; if the carrier refuses, the booking is queued in `shipment-cancel-tasks` and [shipping.job.ts](Web/jobs/shipping.job.ts) retries it every 10 minutes with a growing wait. After the last attempt the task is kept as `failed` and logged for staff to cancel by hand.
 - Points can pay part of an order, up to the customer's balance and the amount due.
 - Loyalty points are earned only once an order is paid, never for cancelled or returned orders. How much order value earns a point, and what a point is worth, are set in Settings → Storefront.
 - Completed, cancelled and returned orders can no longer change status, and a paid order cannot be set back to unpaid; only cancelled or returned orders can be deleted.

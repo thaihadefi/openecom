@@ -3,6 +3,7 @@ import { SHIPPING_CONFIG } from "../../configs/shipping.config";
 import { httpError } from "../../helpers/http-response.helper";
 import { goshipProvider } from "./goship.provider";
 import { IOrderShipping } from "../../interfaces/models/order.interface";
+import ShipmentCancelTask from "../../models/shipment-cancel-task.model";
 import { ShipmentInput, ShipmentResult, ShippingContext, ShippingProvider, ShippingQuoteInput, ShippingRate } from "./shipping-provider";
 
 // Shipping providers the store ships with. To add one for a client: implement ShippingProvider
@@ -49,8 +50,32 @@ export const createShipment = async (rateId: string, input: Omit<ShipmentInput, 
   return provider.createShipment({ ...input, rateId: rateId.slice(separator + 1) }, ctx);
 };
 
-// Cancels the shipment an order booked, when its provider can. Best effort: a failure is logged for
-// staff to cancel with the carrier, and never blocks the order flow that called it.
+const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
+
+// Minutes to wait before retry number `attempts` + 1: 5, 10, 20, ... capped at 6 hours.
+export const retryDelayMinutes = (attempts: number): number =>
+  Math.min(SHIPPING_CONFIG.CANCEL_RETRY_BASE_MINUTES * 2 ** attempts, SHIPPING_CONFIG.CANCEL_RETRY_MAX_MINUTES);
+
+// Queues a booking whose cancellation failed, so the shipment-cancel job retries it.
+// One task per booking; queueing it again keeps the existing schedule.
+export const queueShipmentCancel = async (providerId: string, externalId: string, error: unknown, now = new Date()): Promise<void> => {
+  try {
+    await ShipmentCancelTask.updateOne(
+      { provider: providerId, externalId },
+      {
+        $setOnInsert: { status: "pending", attempts: 0, nextAttemptAt: new Date(now.getTime() + retryDelayMinutes(0) * 60000) },
+        $set: { lastError: errorText(error) }
+      },
+      { upsert: true }
+    );
+  } catch (queueError: unknown) {
+    console.error(`[Shipping] Could not queue the retry for ${providerId} shipment ${externalId}; cancel it with the carrier:`,
+      errorText(queueError));
+  }
+};
+
+// Cancels the shipment an order booked, when its provider can. Never blocks the order flow that called it:
+// a failure is logged and queued, and the shipment-cancel job keeps retrying it.
 export const cancelOrderShipment = async (shipping: IOrderShipping | undefined, ctx?: ShippingContext): Promise<boolean> => {
   // Orders placed before providers were pluggable keep the GoShip code in goshipOrderId.
   const externalId = shipping?.externalId || shipping?.goshipOrderId;
@@ -62,10 +87,50 @@ export const cancelOrderShipment = async (shipping: IOrderShipping | undefined, 
     await provider.cancelShipment(externalId, ctx ?? await getShippingContext());
     return true;
   } catch (error: unknown) {
-    console.error(`[Shipping] Could not cancel ${providerId} shipment ${externalId}; cancel it with the carrier:`,
-      error instanceof Error ? error.message : error);
+    console.error(`[Shipping] Could not cancel ${providerId} shipment ${externalId}; queued for retry:`, errorText(error));
+    await queueShipmentCancel(providerId, externalId, error);
     return false;
   }
+};
+
+// Retries the queued cancellations that are due. A success removes the task; after the last attempt
+// the task is kept as "failed" and logged, so staff cancel it with the carrier by hand.
+export const retryShipmentCancels = async (now = new Date(), shippingCtx?: ShippingContext): Promise<{ cancelled: number; failed: number }> => {
+  const due = await ShipmentCancelTask.find({ status: "pending", nextAttemptAt: { $lte: now } })
+    .sort({ nextAttemptAt: 1 })
+    .limit(SHIPPING_CONFIG.CANCEL_RETRY_BATCH);
+  if (due.length === 0) return { cancelled: 0, failed: 0 };
+
+  const ctx = shippingCtx ?? await getShippingContext();
+  let cancelled = 0;
+  let failed = 0;
+  for (const task of due) {
+    const provider = SHIPPING_PROVIDERS.find((p) => p.id === task.provider);
+    try {
+      if (!provider?.cancelShipment) throw new Error(`Provider "${task.provider}" cannot cancel shipments`);
+      await provider.cancelShipment(task.externalId, ctx);
+      await ShipmentCancelTask.deleteOne({ _id: task._id });
+      cancelled += 1;
+    } catch (error: unknown) {
+      const attempts = (task.attempts ?? 0) + 1;
+      const giveUp = attempts >= SHIPPING_CONFIG.CANCEL_RETRY_MAX_ATTEMPTS;
+      await ShipmentCancelTask.updateOne(
+        { _id: task._id },
+        {
+          attempts,
+          lastError: errorText(error),
+          status: giveUp ? "failed" : "pending",
+          nextAttemptAt: new Date(now.getTime() + retryDelayMinutes(attempts) * 60000)
+        }
+      );
+      if (giveUp) {
+        failed += 1;
+        console.error(`[Shipping] Gave up cancelling ${task.provider} shipment ${task.externalId} after ${attempts} attempts; cancel it with the carrier:`,
+          errorText(error));
+      }
+    }
+  }
+  return { cancelled, failed };
 };
 
 // Grams per unit: the product's own weight, else the store default.
