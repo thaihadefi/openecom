@@ -1,3 +1,9 @@
+mixin coupon-entry()
+  .coupon-entry
+    label.visually-hidden(for="couponCode") Coupon Code
+    input.inner-input(placeholder="Coupon Code" type="text" name="coupon" id="couponCode" autocomplete="off")
+    button.common_btn.inner-button(type="submit") Apply
+
 div(class="cart_page_summary")
   h2 Order Summary
   ul(cart-summary)
@@ -28,23 +34,15 @@ div(class="cart_page_summary")
     | Prices in other currencies are estimates. You will be charged in #{storefront.currency}.
   if (FEATURES.COUPONS)
     form(id="applyCouponForm")
-      label.visually-hidden(for="couponCode") Coupon Code
-      input(
-        placeholder="Coupon Code"
-        type="text"
-        class="inner-input"
-        name="coupon"
-        id="couponCode"
-        autocomplete="off"
-        )
-      button(
-        class="common_btn"
-        type="submit"
-        class="inner-button"
-        ) Apply
+      if !(typeof collapseCouponEntry !== 'undefined' && collapseCouponEntry)
+        +coupon-entry()
       p(class="inner-view-coupon" style="display: none;")
         span
           | Coupon:
           b(class="inner-coupon")
         a(href="javascript:;" class="inner-remove" aria-label="Remove coupon")
           i.fas.fa-times(aria-hidden="true")
+      if (typeof collapseCouponEntry !== 'undefined' && collapseCouponEntry)
+        details.coupon-editor
+          summary Add or change coupon
+          +coupon-entry()

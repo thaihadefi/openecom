@@ -1,5 +1,7 @@
 //- With no saved address to pick, the new-address form starts open and selected.
-- const startWithNewAddress = !(accountUser && accountUser.addressList && accountUser.addressList.length > 0)
+- const savedCheckoutAddress = accountUser && accountUser.addressList ? accountUser.addressList.find(item => item.isDefault) : null
+- const startWithNewAddress = !savedCheckoutAddress
+- const checkoutRecipient = savedCheckoutAddress || accountUser || {}
 form(class="checkout_form_area" id="checkoutAddressForm")
   #accordionExample.accordion
     .accordion-item.border-0
@@ -19,7 +21,7 @@ form(class="checkout_form_area" id="checkoutAddressForm")
               name="userAddress"
               checked=startWithNewAddress
               )
-            label.form-check-label(for="flexCheckDefault") Enter new address
+            label.form-check-label(for="flexCheckDefault") Edit delivery details or enter another address
       #collapseThree.accordion-collapse.collapse(class=startWithNewAddress ? "show" : "" data-bs-parent="#accordionExample")
         .accordion-body.p-0
           .row
@@ -32,6 +34,7 @@ form(class="checkout_form_area" id="checkoutAddressForm")
                   name="fullName"
                   id="checkoutFullName"
                   autocomplete="name"
+                  value=checkoutRecipient.fullName || ''
                   )
             .col-md-6
               div(class="single_input")
@@ -42,6 +45,7 @@ form(class="checkout_form_area" id="checkoutAddressForm")
                   name="phone"
                   id="checkoutPhone"
                   autocomplete="tel"
+                  value=checkoutRecipient.phone || ''
                   )
             .col-md-12.mt-4
               label(for="mapSearchInput") Select address on map *
@@ -61,11 +65,11 @@ form(class="checkout_form_area" id="checkoutAddressForm")
             .col-md-6
               div(class="single_input")
                 label(for="longitude") Longitude *
-                input(type="text" name="longitude" id="longitude")
+                input(type="text" name="longitude" id="longitude" value=savedCheckoutAddress ? savedCheckoutAddress.longitude : '')
             .col-md-6
               div(class="single_input")
                 label(for="latitude") Latitude *
-                input(type="text" name="latitude" id="latitude")
+                input(type="text" name="latitude" id="latitude" value=savedCheckoutAddress ? savedCheckoutAddress.latitude : '')
             .col-md-12
               div(class="single_input")
                 label(for="checkoutAddress") Address *
@@ -75,7 +79,9 @@ form(class="checkout_form_area" id="checkoutAddressForm")
                   name="address"
                   id="checkoutAddress"
                   autocomplete="street-address"
+                  value=savedCheckoutAddress ? savedCheckoutAddress.address : ''
                   )
+          p.small.text-muted Changes here apply to this order only. Your saved profile and addresses stay unchanged.
   .col-xl-12
     div(class="single_input")
       label(for="checkoutNote") Note

@@ -2972,6 +2972,8 @@ function checkCoupon(coupon) {
         elementViewCoupon.style.display = "flex";
         elementCoupon.textContent = coupon;
         sessionStorage.setItem("couponDetail", JSON.stringify(data.couponDetail));
+        const couponEditor = applyCouponForm.querySelector(".coupon-editor");
+        if (couponEditor) couponEditor.open = false;
       }
 
       drawCart();
@@ -3009,6 +3011,27 @@ if(checkoutPage) {
 
   // Saved addresses but none marked default: start on the new-address form rather than on nothing.
   const inputNewAddress = checkoutPage.querySelector("#flexCheckDefault");
+  const copyCheckoutAddress = (input) => {
+    const info = JSON.parse(input.getAttribute("data-info"));
+    const form = checkoutPage.querySelector("#checkoutAddressForm");
+    ["fullName", "phone", "address", "longitude", "latitude"].forEach(name => {
+      form.elements.namedItem(name).value = info[name] ?? "";
+    });
+    const map = locationPicker?.getMap();
+    const longitude = Number(info.longitude);
+    const latitude = Number(info.latitude);
+    if (map && Number.isFinite(longitude) && Number.isFinite(latitude)) {
+      locationPicker.setMarker(longitude, latitude);
+      map.getView().setCenter(ol.proj.fromLonLat([longitude, latitude]));
+    }
+  };
+  checkoutPage.querySelectorAll("[data-edit-checkout-address]").forEach(button => {
+    button.addEventListener("click", () => {
+      copyCheckoutAddress(document.getElementById(button.dataset.editCheckoutAddress));
+      inputNewAddress.checked = true;
+      inputNewAddress.dispatchEvent(new Event("change"));
+    });
+  });
   if (inputNewAddress && ![...listInputUserAddress].some((input) => input.checked)) {
     inputNewAddress.checked = true;
     collapse.show();
@@ -3033,6 +3056,7 @@ if(checkoutPage) {
       if(input.value == "") {
         collapse.show();
       } else {
+        copyCheckoutAddress(input);
         collapse.hide();
       }
       locationPicker?.getMap()?.updateSize();

@@ -1,4 +1,4 @@
-if (accountUser && accountUser.addressList.length > 0)
+if (accountUser && accountUser.addressList && accountUser.addressList.length > 0)
   div(class="checkout_address_area")
     .row
       each item, index in accountUser.addressList
@@ -61,3 +61,4 @@ if (accountUser && accountUser.addressList.length > 0)
                       stroke-linecap="round"
                       )
                   | #{item.address}
+            button.btn.checkout-edit-address(type="button" data-edit-checkout-address=`userAddress${index}`) Edit for this order

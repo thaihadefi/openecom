@@ -4338,12 +4338,20 @@ a[href^="tel:"], a[href^="mailto:"] { display: inline-block; padding: 8px 0; }
 
 /* Points row is a regular summary line, not a boxed card, so its label stays on one line. */
 .checkout_point_row label { white-space: nowrap; }
+.checkout-edit-address { color: var(--ink); text-decoration: underline; min-height: 44px; }
 
 /* Coupon field: input and button side by side at the same height (the template overlays an
    absolutely positioned button, which spills out of the field when the input height changes). */
-.cart_page_summary form { display: flex !important; align-items: stretch; gap: 8px; }
-.cart_page_summary form input { flex: 1 1 auto; min-width: 0; padding-right: 16px !important; }
+.cart_page_summary form { display: flex !important; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+.cart_page_summary form input { flex: 1 1 120px; min-width: 0; padding-right: 16px !important; }
 .cart_page_summary form button { position: static !important; flex: 0 0 auto; }
+.cart_page_summary form .inner-view-coupon { flex: 0 0 100%; min-width: 0; margin: 0; gap: 8px; }
+.cart_page_summary form .inner-view-coupon > span { min-width: 0; overflow-wrap: anywhere; }
+.cart_page_summary form .inner-remove { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; }
+.cart_page_summary .coupon-entry { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.cart_page_summary .coupon-editor { width: 100%; min-width: 0; }
+.cart_page_summary .coupon-editor summary { cursor: pointer; padding-block: 12px; }
+.cart_page_summary .coupon-editor[open] .coupon-entry { margin-top: 8px; }
 
 @media (max-width: 991.98px) {
     .dashboard_sidebar {

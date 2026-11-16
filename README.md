@@ -174,6 +174,7 @@ Modules marked *(optional)* can be switched off with a feature flag.
 - Browse, filter, sort and search products (with live suggestions). For products with variants such as size and color, shoppers choose their options before adding to cart; only groups with a single value are preselected. The picker updates price, stock and images.
 - Cart (kept in the browser), wishlist *(optional)* and product comparison *(optional)*.
 - Checkout with coupons *(optional)*, loyalty points *(optional)*, a map address picker and GoShip rates from several carriers, cheapest first (weight per product, with a store default).
+- Checkout selects the default Address Book entry when available, or prefills the recipient name and phone from the profile. “Edit for this order” copies a saved address into an editable form; changes apply only to the current order. Coupons entered in the cart carry over to checkout, where “Add or change coupon” opens the editor.
 - Pay by cash on delivery, VNPay or ZaloPay out of the box, with room for [more gateways](#adding-a-payment-gateway) (only the methods the store has set up are offered), and a retry button when an online payment did not finish.
 - Order emails and order status in the customer account; reviews on purchased products and reports on abusive reviews *(optional)*.
 - Live chat with the store: typing and online status, attachments, and a rating at the end *(optional)*.
