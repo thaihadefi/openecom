@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as orderController from "../../controllers/admin/order.controller";
 import { checkAnyPermission, checkPermission } from "../../middlewares/admin/auth.middleware";
 import { requireFeature } from "../../middlewares/feature.middleware";
+import { textForm } from "../../helpers/upload.helper";
 
 import { permanentOnly } from "../../helpers/rest.helper";
 const router = Router();
@@ -17,7 +18,7 @@ export const api = Router();
 
 api.delete('/:id', permanentOnly, checkPermission("order-delete"), orderController.destroyDelete);
 
-api.patch('/:id', checkPermission("order-edit"), orderController.editPatch);
+api.patch('/:id', checkPermission("order-edit"), textForm.none(), orderController.editPatch);
 
 api.post('/:id/restore', checkPermission("order-edit"), orderController.undoPatch);
 

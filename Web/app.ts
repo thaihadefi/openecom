@@ -84,6 +84,12 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
+// Unsupported or absent content types leave req.body undefined; validators should reject an empty body.
+app.use((req, _res, next) => {
+  if (req.body === undefined) req.body = {};
+  next();
+});
+
 // The API documentation changes with the specification, so browsers revalidate it (ETag) instead of caching it for a week.
 app.use('/api-docs', express.static(path.join(process.cwd(), 'public', 'api-docs'), { maxAge: 0 }));
 
@@ -247,7 +253,10 @@ app.use((req, res) => {
 app.use((err: { name?: string; message?: string; status?: number; statusCode?: number }, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('[UnhandledError]', err?.message || err);
   if (res.headersSent) return;
-  const isUploadError = err.name === 'MulterError' || err.name === 'UploadRejectedError';
+  // Busboy reports malformed multipart bodies as plain Errors rather than MulterErrors.
+  const isMultipartParseError = (req.headers['content-type'] || '').startsWith('multipart/form-data') &&
+    ['Malformed part header', 'Unexpected end of form', 'Unexpected end of file', 'Multipart: Boundary not found'].includes(err.message || '');
+  const isUploadError = err.name === 'MulterError' || err.name === 'UploadRejectedError' || isMultipartParseError;
   const status = isUploadError ? 400 : (err.status || err.statusCode || 500);
   const isApiRequest = isUploadError || req.xhr || req.originalUrl.includes('/api/') || (req.headers.accept || '').includes('application/json');
   if (isApiRequest) {
