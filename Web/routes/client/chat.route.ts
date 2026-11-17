@@ -9,7 +9,7 @@ sessionStateApi.get('/current', chatController.session);
 
 export const chatApi = Router();
 
-chatApi.get('/current/messages', chatController.messages);
+chatApi.get('/current/messages', authMiddleware.loggedIn, chatController.messages);
 
 chatApi.post(
   '/current/attachments',
