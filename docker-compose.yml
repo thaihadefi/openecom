@@ -61,9 +61,11 @@ services:
     depends_on:
       web:
         condition: service_healthy
+    # Bound to the loopback address: on a server, only the HTTPS proxy on the same machine reaches
+    # these ports, so nobody can bypass HTTPS with http://<server-ip>:8030. Locally, localhost works as before.
     ports:
-      - "8030:80"
-      - "3000:80"
+      - "127.0.0.1:8030:80"
+      - "127.0.0.1:3000:80"
     volumes:
       # Directory mount, not a single file: editors replace files on save, which leaves a
       # single-file bind mount pointing at the old, deleted copy. nginx loads conf.d/*.conf.
