@@ -155,6 +155,20 @@ export const emailTemplates = {
     };
   },
 
+  paymentReceived: async (orderCode: string, amount: number, method: string) => {
+    const storeName = await getStoreName();
+    return {
+      subject: `Payment Received for Order #${orderCode} - ${storeName}`,
+      html: buildEmailHtml(
+        storeName,
+        "Payment Received",
+        `<p>We received your payment for order <strong>#${htmlEscape(orderCode)}</strong>.</p>
+        <p>Amount paid: <strong>${htmlEscape(formatPrice(amount))}</strong><br>
+        Payment method: ${htmlEscape(paymentMethodLabel(method))}</p>`
+      )
+    };
+  },
+
   orderConfirmation: async (order: {
     code: string;
     fullName: string;

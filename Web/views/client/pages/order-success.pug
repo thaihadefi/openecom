@@ -3,6 +3,7 @@ extends ../layouts/default.pug
 block main
   - const ended = typeof orderEnded !== "undefined" ? orderEnded : !!(orderDetail && (["cancelled", "returned"].includes(orderDetail.orderStatus) || orderDetail.paymentStatus === "refunded"))
   - const paymentIncomplete = !!(!ended && orderDetail && isOnlinePayment(orderDetail.paymentMethod) && orderDetail.paymentStatus === "unpaid")
+  - const waitForPayment = paymentIncomplete && orderDetail.paymentMethod === "zalopay"
   - const celebrationKey = `order-celebrated-${(orderDetail && orderDetail.code) || orderCode}`
   section(class="payment_success mt_100 mb_100")
     .container
@@ -10,14 +11,24 @@ block main
         .col-xl-6.col-md-10.col-lg-8.col-xxl-5.wow.fadeInUp
           div(class="payment_success_text")
             if (paymentIncomplete)
-              h1(style="color: #d97706;") Payment Incomplete
+              if waitForPayment
+                h1(data-payment-heading aria-live="polite") Checking Payment
+              else
+                h1(style="color: var(--gold);") Payment Incomplete
               p
-                | Your order <b>#{orderDetail.code}</b> has been placed, but payment was not completed yet.
+                | Your order <b>#{orderDetail.code}</b> has been placed.
+                if waitForPayment
+                  span(data-payment-message)  We’re waiting for ZaloPay to confirm your payment.
+                else
+                  |  Payment was not completed yet.
               .d-flex.flex-wrap.align-items-center.justify-content-center.gap-3
                 a(
-                  class="common_btn go_btn"
+                  class=["common_btn", "go_btn", waitForPayment && "d-none"]
+                  data-payment-retry=waitForPayment ? "" : undefined
                   href=`/order/payment-${orderDetail.paymentMethod}?orderCode=${orderDetail.code}&phone=${orderDetail.phone}`
                   ) Retry Payment
+                if waitForPayment
+                  a.common_btn.go_btn(href=`/order/success?orderCode=${encodeURIComponent(orderDetail.code)}&phone=${encodeURIComponent(orderDetail.phone)}`) Check Payment
                 if (accountUser && orderDetail.id)
                   a(
                     class="common_btn"
@@ -63,6 +74,9 @@ block main
                     )
                     | Log In
                     i.fas.fa-long-arrow-right(aria-hidden="true")
+
+  if waitForPayment
+    script(src=`/client/assets/js/order-payment-status.js?v=${assetVersion}` defer)
 
   //- Celebrate a placed order once per browser. Online orders must be paid first.
   if (orderDetail && !ended && !paymentIncomplete)

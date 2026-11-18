@@ -256,6 +256,8 @@ Then set **Settings → General Settings → Website Domain** to the ngrok URL. 
 
 Once the site is hosted, register the VNPay IPN (`/order/payment-vnpay-ipn`) and ZaloPay callback (`/order/payment-zalopay-callback`) URLs in the merchant portals.
 
+If the browser returns before the ZaloPay callback, the order page checks for confirmation for up to 30 seconds and shows the result automatically when it arrives. Customers can check again after that. For an open order linked to an account with an email address, the first verified online payment confirmation triggers a payment receipt in addition to the order placement email.
+
 ## Search and AI discovery
 
 Search engines and AI assistants read the store from the same data the pages show; nothing here needs its own content.

@@ -34,11 +34,23 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const success = async (req: Request, res: Response) => {
   const { orderCode, phone } = req.query;
+  const paymentCheck = req.query.paymentCheck === "1";
+  res.set("Cache-Control", "no-store");
 
   const orderDetail = await orderService.getOrderByCodeAndPhone(String(orderCode), String(phone));
 
   if (!orderDetail) {
+    if (paymentCheck) {
+      res.sendStatus(404);
+      return;
+    }
     res.redirect("/");
+    return;
+  }
+
+  const orderEnded = ["cancelled", "returned"].includes(String(orderDetail.orderStatus)) || orderDetail.paymentStatus === "refunded";
+  if (paymentCheck) {
+    res.json({ settled: orderEnded || orderDetail.paymentStatus === "paid" });
     return;
   }
 
@@ -47,7 +59,7 @@ export const success = async (req: Request, res: Response) => {
     orderDetail: orderDetail,
     orderCode: orderDetail.code || String(orderCode),
     // A cancelled, returned or refunded order is over, so the page does not celebrate it.
-    orderEnded: ["cancelled", "returned"].includes(String(orderDetail.orderStatus)) || orderDetail.paymentStatus === "refunded"
+    orderEnded
   });
 };
 
