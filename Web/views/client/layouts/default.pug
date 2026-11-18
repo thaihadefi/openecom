@@ -3,6 +3,13 @@ html(lang=storefront.language)
   head
     script.
       (function() {
+        try {
+          const savedTheme = localStorage.getItem('openecom_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        } catch(e) {}
+      })();
+    script.
+      (function() {
         const savedLang = localStorage.getItem("selectedLanguage") || "en";
         if (savedLang && savedLang !== "en") {
           document.documentElement.classList.add("translation-pending");
@@ -225,6 +232,7 @@ html(lang=storefront.language)
     script(src=`/client/assets/js/custom.js?v=${assetVersion}`)
     script(src=`/common/assets/js/location-picker.js?v=${assetVersion}`)
     script(src=`/client/assets/js/main.js?v=${assetVersion}`)
+    script(src=`/client/assets/js/enhancements.js?v=${assetVersion}`)
     if (markdownPath)
       script(src=`/client/assets/js/page-actions.js?v=${assetVersion}`)
     if (FEATURES.CHAT)
@@ -276,6 +284,31 @@ html(lang=storefront.language)
           prefetch(p + a.search);
         }, { passive: true });
       })();
+          script.
+      (function() {
+        const toggleBtn = document.getElementById('themeToggle');
+        if (!toggleBtn) return;
+        const updateIcon = (isDark) => {
+          const icon = toggleBtn.querySelector('i');
+          if (icon) {
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+          }
+        };
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        updateIcon(currentTheme === 'dark');
+
+        toggleBtn.addEventListener('click', function() {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          const nextTheme = isDark ? 'light' : 'dark';
+          if (nextTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+          localStorage.setItem('openecom_theme', nextTheme);
+          updateIcon(!isDark);
+        });
+      })();
     //- PWA Service Worker registration
     script.
       if ('serviceWorker' in navigator) {
@@ -283,3 +316,28 @@ html(lang=storefront.language)
           navigator.serviceWorker.register('/sw.js?admin=#{encodeURIComponent(pathAdmin)}').catch(function() {});
         });
       }
+
+    script.
+      (function() {
+        const updateIcons = function(isDark) {
+          document.querySelectorAll('.theme_toggle_btn i').forEach(function(icon) {
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+          });
+        };
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        updateIcons(currentTheme === 'dark');
+
+        document.addEventListener('click', function(e) {
+          const btn = e.target.closest('.theme_toggle_btn');
+          if (!btn) return;
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          const nextTheme = isDark ? 'light' : 'dark';
+          if (nextTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+          localStorage.setItem('openecom_theme', nextTheme);
+          updateIcons(!isDark);
+        });
+      })();

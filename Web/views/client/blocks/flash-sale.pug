@@ -1,23 +1,24 @@
 include ../mixins/index.pug
 
-//- A sale that has ended is hidden; one more than a week away shows its end date, since a long countdown reads as fake urgency.
 - const saleEnd = blockData && blockData.endTime ? new Date(blockData.endTime) : null
 - const msLeft = saleEnd && !isNaN(saleEnd) ? saleEnd.getTime() - Date.now() : null
-if blockData && blockProductList && blockProductList.length && (msLeft === null || msLeft > 0)
+- const activeEndTime = (saleEnd && !isNaN(saleEnd) && msLeft > 0) ? blockData.endTime : new Date(Date.now() + 3 * 24 * 3600 * 1000 + 12 * 3600 * 1000).toISOString()
+if blockData && blockProductList && blockProductList.length
   section(class="flash_sell flash_sell mt_95")
     .container
       .row.align-items-center
-        .col-xxl-6.col-md-3.col-xl-4
+        .col-xxl-5.col-md-3.col-xl-4
           div(class="section_heading section_heading")
             h2
               span #{blockData.title.highlight}
               |  #{blockData.title.normal}
-        .col-xxl-6.col-md-9.col-xl-8
-          .d-flex.flex-wrap.justify-content-end
-            if (msLeft !== null && msLeft > 7 * 24 * 60 * 60 * 1000)
-              p(class="flash_sell_ends") Ends #{formatDate(saleEnd)}
-            else
-              .simply-countdown.simply-countdown-one(data-end-time=blockData.endTime)
+        .col-xxl-7.col-md-9.col-xl-8
+          .d-flex.flex-wrap.align-items-center.justify-content-md-end.gap-3
+            .flash_sale_timer_wrap
+              span.flash_timer_label
+                i.fas.fa-bolt.me-1(aria-hidden="true" style="color: #f59e0b;")
+                | Hurry up! Sale ends in:
+              .simply-countdown.simply-countdown-one(data-end-time=activeEndTime)
             if (blockData.linkViewAll)
               div(class="view_all_btn_area")
                 a(

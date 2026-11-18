@@ -28,6 +28,12 @@ header(class="header_main")
             a.header_mobile_btn(href="/cart" aria-label="Shopping cart")
               i.fas.fa-shopping-cart(aria-hidden="true")
               span.header_mobile_count(mini-cart-quantity aria-hidden="true") 0
+            button.header_mobile_btn.theme_toggle_btn(
+              type="button"
+              aria-label="Toggle dark mode"
+              title="Toggle Dark/Light Mode"
+              )
+              i.fas.fa-moon(aria-hidden="true")
             button.d-block.d-lg-none(
               aria-controls="offcanvasWithBothOptions"
               aria-label="Open menu"
@@ -73,6 +79,8 @@ header(class="header_main")
                 a(href=storeContact.phoneHref)
                   span= storeContact.phone
         .d-flex.align-items-center.topbar_right
+          button.theme_toggle_btn(type="button" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode")
+            i.fas.fa-moon(aria-hidden="true")
           if (FEATURES.TRANSLATE)
             .gtranslate_wrapper
           if (storefront.displayCurrencies.length > 1)

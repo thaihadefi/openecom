@@ -4836,3 +4836,568 @@ main#main-content > .page_breadcrumb + section { padding-top: 0 !important; }
 @media (max-width: 575px) {
   .dashboard_profile_info_list ul li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 }
+
+/* ==========================================================================
+   CLEAN ADAPTIVE STOREFRONT & POLISH (Cam Phung - Frontend)
+   Adaptive High-Contrast Typography in Light & Dark (True Pitch Black)
+   Features: 4 Main Points Pop, Flash Sale Clock, Standard/Express Shipping,
+   Stable Add-to-Cart Button, Balanced Wishlist/Compare, High Contrast Footer
+   ========================================================================== */
+
+/* ── 0. Light Mode Variables: Clean, Elegant & High-Contrast ─────────────── */
+:root {
+    --paper:            #FAFAF9;
+    --surface:          #FFFFFF;
+    --surface-2:        #F4F4F5;
+
+    /* High contrast dark text for Light Mode */
+    --ink:              #18181B;   /* Headings, strong text */
+    --ink-2:            #09090B;
+    --muted:            #27272A;   /* Primary body text - 100% sharp & readable */
+    --faint:            #71717A;   /* Muted captions */
+
+    --line:             #E4E4E7;
+    --line-2:           #D4D4D8;
+    --borderColor:      #E4E4E7;
+
+    --themeColorOne:     #E11D48;
+    --themeColorOneDark: #BE185D;
+    --themeColorTwo:     #A16207;
+    --themeColorTwoDark: #854D0E;
+    --colorBlack:        #18181B;
+    --paraColor:         #27272A;
+    --lightBg:           #FAFAF9;
+    --lightBg2:          #F4F4F5;
+    --gold:              #E11D48;
+    --gold-dim:          #BE185D;
+    --gold-soft:         rgba(225, 29, 72, 0.08);
+}
+
+body {
+    background-color: var(--paper) !important;
+    color: var(--muted) !important;
+}
+
+/* ── 1. Minimal Sun/Moon Theme Toggle (Icon Only) ─────────────────────────── */
+.theme_toggle_btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    border: 1.5px solid #D4D4D8 !important;
+    background: #FFFFFF !important;
+    color: #18181B !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+    margin-left: 8px;
+    padding: 0 !important;
+}
+.theme_toggle_btn:hover {
+    border-color: #E11D48 !important;
+    color: #E11D48 !important;
+    transform: rotate(15deg);
+}
+
+/* ── 2. Stable "Add to Cart" Button (Size Stays Fixed, Never Expands!) ───── */
+.common_btn {
+    background: #E11D48 !important;
+    color: #FFFFFF !important;
+    font-family: var(--bodyFont) !important;
+    font-weight: 700 !important;
+    padding: 11px 24px !important;
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+    border-radius: 999px !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    text-transform: none !important;
+    cursor: pointer !important;
+    transform: none !important;
+    transition: background 0.2s ease, box-shadow 0.2s ease !important;
+    max-width: 100%;
+}
+.common_btn:hover {
+    background: #BE185D !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35) !important;
+    transform: none !important;
+    color: #FFFFFF !important;
+}
+.common_btn:active,
+.common_btn:focus,
+[button-add-cart],
+[button-add-cart]:hover,
+[button-add-cart]:active,
+[button-add-cart]:focus,
+[btn-cart-quick],
+[btn-cart-quick]:hover,
+[btn-cart-quick]:active,
+[btn-cart-quick]:focus,
+.details_btn .common_btn,
+.details_btn .common_btn:active,
+.details_btn .common_btn:focus {
+    transform: none !important;
+    scale: 1 !important;
+    zoom: 1 !important;
+    animation: none !important;
+}
+
+/* ── 3. Gentle Floating Hearts on Wishlist Click (Nhẹ nhàng như đợt trước) ─ */
+.float-heart {
+    position: absolute;
+    font-size: 18px;
+    color: #E11D48;
+    pointer-events: none;
+    z-index: 99999;
+    user-select: none;
+    animation: gentleHeartFloat 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+@keyframes gentleHeartFloat {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.6);
+    }
+    40% {
+        opacity: 0.9;
+        transform: translate(calc(-50% + var(--dx) * 0.5), calc(-50% + var(--dy) * 0.5)) scale(1.15);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.6);
+    }
+}
+
+/* ── 4. 4 Main Points (Features) — Stand Out & Catchy ─────────────────────── */
+.features {
+    padding: 28px 0 !important;
+    margin-top: 24px;
+}
+.features_item {
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--line) !important;
+    border-radius: 16px !important;
+    padding: 22px 18px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+}
+.features_item:hover {
+    transform: translateY(-5px) !important;
+    border-color: #E11D48 !important;
+    box-shadow: 0 10px 28px rgba(225, 29, 72, 0.12) !important;
+}
+.features_item .icon {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 14px !important;
+    background: #FFF1F5 !important;
+    border: 1px solid #FECDD3 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    transition: all 0.25s ease;
+}
+.features_item:hover .icon {
+    background: #E11D48 !important;
+}
+.features_item:hover .icon i {
+    color: #FFFFFF !important;
+}
+.features_item .icon i {
+    font-size: 24px !important;
+    color: #E11D48 !important;
+    transition: color 0.2s ease;
+}
+.features_item .text h3 {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: var(--ink) !important;
+    margin-bottom: 3px !important;
+}
+.features_item .text p {
+    font-size: 13px !important;
+    color: var(--faint) !important;
+    margin: 0 !important;
+    line-height: 1.4;
+}
+
+/* ── 5. Flash Sale Countdown Clock ───────────────────────────────────────── */
+.flash_sale_timer_wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.flash_timer_label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #E11D48;
+    display: flex;
+    align-items: center;
+}
+.simply-countdown {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+.simply-countdown .simply-section {
+    background: #FFFFFF !important;
+    border: 1.5px solid #FECDD3 !important;
+    border-radius: 10px !important;
+    padding: 6px 12px !important;
+    min-width: 54px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+.simply-countdown .simply-amount {
+    font-size: 19px !important;
+    font-weight: 800 !important;
+    color: #E11D48 !important;
+    line-height: 1.1 !important;
+    display: block;
+    font-family: var(--bodyFont) !important;
+}
+.simply-countdown .simply-word {
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    color: #71717A !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    display: block;
+}
+
+/* ── 6. Balanced Wishlist & Compare Layout ────────────────────────────────── */
+.wishlist_title, .compare_title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ink) !important;
+    margin-bottom: 6px;
+}
+.wishlist_sub, .compare_sub {
+    font-size: 14px;
+    color: var(--faint) !important;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.wishlist_card_wrapper, .compare_card_wrapper {
+    background: #FFFFFF !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--line) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    padding: 8px;
+}
+
+.wishlist_table thead th {
+    background: #F4F4F5 !important;
+    color: var(--ink) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    text-transform: uppercase;
+    padding: 14px 16px !important;
+    border: none !important;
+}
+.wishlist_table tbody td {
+    padding: 14px 16px !important;
+    vertical-align: middle !important;
+    border-top: 1px solid var(--line) !important;
+    color: var(--muted) !important;
+}
+.wishlist_page .cart_page_img img {
+    width: 72px !important;
+    height: 72px !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--line) !important;
+}
+.wishlist_page .cart_page_details h3 a {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--ink) !important;
+    text-decoration: none;
+}
+.wishlist_page .cart_page_details h3 a:hover {
+    color: #E11D48 !important;
+}
+.wishlist_page .cart_page_price span {
+    font-weight: 700;
+    color: #E11D48 !important;
+}
+.wishlist_page .cart_page_action .remove {
+    background: #F4F4F5 !important;
+    color: #71717A !important;
+    border: 1px solid #D4D4D8 !important;
+    border-radius: 999px !important;
+    padding: 7px 16px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    margin-left: 6px;
+    box-shadow: none !important;
+}
+.wishlist_page .cart_page_action .remove:hover {
+    background: #E11D48 !important;
+    color: #FFFFFF !important;
+    border-color: #E11D48 !important;
+}
+
+/* Compare Table */
+.compare_table td.compare_label_col {
+    background: #F4F4F5 !important;
+    color: var(--ink) !important;
+    font-weight: 700 !important;
+    width: 160px;
+    border-right: 1px solid var(--line) !important;
+}
+.compare_table td {
+    padding: 16px !important;
+    border: 1px solid var(--line) !important;
+    vertical-align: middle !important;
+    color: var(--muted);
+}
+.compare_table td img {
+    max-height: 110px !important;
+    object-fit: contain !important;
+    border-radius: 8px;
+}
+.compare_table td h3 a {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--ink) !important;
+}
+
+/* ── 7. Shipping Methods: Standard & Express Selection (Matches Deploy) ──── */
+.checkout_shipping {
+    background: var(--surface) !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    margin: 14px 0 !important;
+    border: 1.5px solid var(--line) !important;
+}
+.checkout_shipping .summary_row_head {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--ink) !important;
+    margin-bottom: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.checkout_shipping .form-check {
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px 12px 38px;
+    margin-bottom: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.checkout_shipping .form-check:hover {
+    border-color: #E11D48;
+    background: rgba(225, 29, 72, 0.02);
+}
+.checkout_shipping .form-check:has(input:checked) {
+    border-color: #E11D48;
+    background: rgba(225, 29, 72, 0.05);
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.12);
+}
+.checkout_shipping .form-check input.form-check-input {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    cursor: pointer;
+}
+.checkout_shipping .form-check input.form-check-input:checked {
+    background-color: #E11D48;
+    border-color: #E11D48;
+}
+.checkout_shipping .form-check label.form-check-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+}
+.checkout_shipping .form-check label.form-check-label small {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 13px;
+}
+.checkout_shipping .form-check label.form-check-label span {
+    font-weight: 700;
+    color: #E11D48;
+}
+
+/* ── 8. TRUE PITCH BLACK DARK MODE (Clean Charcoal & Pure Black, No Purple) ─ */
+[data-theme="dark"] {
+    --paper:     #09090B;   /* Deep neutral pitch black */
+    --surface:   #121214;   /* Neutral charcoal */
+    --surface-2: #18181B;   /* Elevated card background */
+
+    --ink:       #FAFAFA;   /* Pure crisp white headings */
+    --ink-2:     #FFFFFF;
+    --muted:     #E4E4E7;   /* Clear, high-contrast silver body text (100% readable) */
+    --faint:     #A1A1AA;   /* Secondary text */
+
+    --line:      #27272A;   /* Neutral dark borders */
+    --line-2:    #3F3F46;
+    --borderColor: #27272A;
+
+    --colorBlack: #FAFAFA;
+    --colorWhite: #121214;
+    --paraColor:  #E4E4E7;
+    --lightBg:    #09090B;
+    --lightBg2:   #121214;
+
+    --gold:      #F43F5E;
+    --gold-dim:  #E11D48;
+    --gold-soft: rgba(244, 63, 94, 0.12);
+}
+
+[data-theme="dark"] body {
+    background-color: #09090B !important;
+    color: #E4E4E7 !important;
+}
+
+[data-theme="dark"] header.header_main,
+[data-theme="dark"] .main_menu_2 {
+    background: #0D0D10 !important;
+    border-color: #27272A !important;
+}
+
+[data-theme="dark"] .features_item,
+[data-theme="dark"] .product_item,
+[data-theme="dark"] .product_item_2,
+[data-theme="dark"] .category_item,
+[data-theme="dark"] .checkout_payment,
+[data-theme="dark"] .cart_page_summary,
+[data-theme="dark"] .checkout_form_area,
+[data-theme="dark"] .wishlist_card_wrapper,
+[data-theme="dark"] .compare_card_wrapper,
+[data-theme="dark"] .dashboard_sidebar,
+[data-theme="dark"] .dashboard .dashboard_content,
+[data-theme="dark"] .sign_in_form,
+[data-theme="dark"] .single_input,
+[data-theme="dark"] .checkout_shipping {
+    background: #121214 !important;
+    border-color: #27272A !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .features_item .icon {
+    background: #18181B !important;
+    border-color: #27272A !important;
+}
+[data-theme="dark"] .features_item .icon i {
+    color: #F43F5E !important;
+}
+[data-theme="dark"] .features_item:hover {
+    border-color: #F43F5E !important;
+    box-shadow: 0 8px 24px rgba(244, 63, 94, 0.25) !important;
+}
+
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3,
+[data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6,
+[data-theme="dark"] .product_item h3 a, [data-theme="dark"] .product_item_2 h3 a,
+[data-theme="dark"] .wishlist_title, [data-theme="dark"] .compare_title {
+    color: #FAFAFA !important;
+}
+
+[data-theme="dark"] p,
+[data-theme="dark"] td,
+[data-theme="dark"] th,
+[data-theme="dark"] label,
+[data-theme="dark"] span:not(.badge):not(.simply-amount):not(.simply-word) {
+    color: #E4E4E7 !important;
+}
+
+[data-theme="dark"] .theme_toggle_btn {
+    background: #18181B !important;
+    border-color: #F59E0B !important;
+    color: #F59E0B !important;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.25) !important;
+}
+
+[data-theme="dark"] .simply-countdown .simply-section {
+    background: #18181B !important;
+    border-color: #3F3F46 !important;
+}
+[data-theme="dark"] .simply-countdown .simply-amount {
+    color: #F43F5E !important;
+}
+
+[data-theme="dark"] .wishlist_table thead th,
+[data-theme="dark"] .compare_table td.compare_label_col {
+    background: #18181B !important;
+    color: #FAFAFA !important;
+    border-color: #27272A !important;
+}
+[data-theme="dark"] .wishlist_table tbody td,
+[data-theme="dark"] .compare_table td {
+    border-color: #27272A !important;
+    color: #E4E4E7 !important;
+}
+[data-theme="dark"] .wishlist_table tbody tr:hover,
+[data-theme="dark"] .compare_table td:not(.compare_label_col):hover {
+    background: #18181B !important;
+}
+
+/* ── 9. HIGH-CONTRAST FOOTER IN DARK MODE (100% Crisp & Visible!) ────────── */
+[data-theme="dark"] .footer,
+[data-theme="dark"] footer,
+[data-theme="dark"] .footer_main {
+    background: #000000 !important;
+    border-top: 1px solid #27272A !important;
+    color: #E4E4E7 !important;
+}
+[data-theme="dark"] .footer h1,
+[data-theme="dark"] .footer h2,
+[data-theme="dark"] .footer h3,
+[data-theme="dark"] .footer h4,
+[data-theme="dark"] .footer_link_title,
+[data-theme="dark"] .footer_link h2,
+[data-theme="dark"] .footer_main h2 {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+[data-theme="dark"] .footer p,
+[data-theme="dark"] .footer span,
+[data-theme="dark"] .footer li,
+[data-theme="dark"] .footer_link li a,
+[data-theme="dark"] .footer_main p,
+[data-theme="dark"] .footer_main span,
+[data-theme="dark"] .footer_main a {
+    color: #D4D4D8 !important;
+    font-size: 14px !important;
+}
+[data-theme="dark"] .footer_link li a:hover,
+[data-theme="dark"] .footer_main a:hover {
+    color: #F43F5E !important;
+}
+[data-theme="dark"] .footer_bottom,
+[data-theme="dark"] .footer_copyright {
+    background: #050505 !important;
+    border-top: 1px solid #18181B !important;
+    color: #A1A1AA !important;
+}
+[data-theme="dark"] .footer_copyright p,
+[data-theme="dark"] .footer_copyright b,
+[data-theme="dark"] .footer_copyright li {
+    color: #A1A1AA !important;
+}
