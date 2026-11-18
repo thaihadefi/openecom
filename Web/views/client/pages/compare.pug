@@ -9,41 +9,43 @@ block main
     `/compare`
   )
 
-  section(class="compare_page mt_100 mb_100")
+  section(class="compare_page mt_60 mb_100")
     .container
+      .compare_header_bar.mb-4.text-center
+        p.compare_sub= FEATURES.REVIEWS ? "Price, description, variants and rating side by side." : "Price, description and variants side by side."
       .row
         .col-12
-          .wow.fadeInUp(class="compare_list_area")
+          .wow.fadeInUp(class="compare_list_area compare_card_wrapper")
             .table-responsive
-              table.table
+              table.table.compare_table
                 tbody
                   tr
-                    td
+                    td.compare_label_col
                       p
-                        b Products
+                        b Product
                     td(html-1)
                   tr
-                    td
+                    td.compare_label_col
                       p
                         b Description
                     td(html-2)
                   tr
-                    td
+                    td.compare_label_col
                       p
                         b Price
                     td(html-3)
                   tr
-                    td
+                    td.compare_label_col
                       p
                         b Variants
                     td(html-4)
-                  tr
-                    td
+                  tr(hidden=!FEATURES.REVIEWS)
+                    td.compare_label_col
                       p
-                        b Reviews
+                        b Rating
                     td(html-5)
                   tr
-                    td
+                    td.compare_label_col
                       p
                         b Action
                     td(html-6)

@@ -45,7 +45,9 @@ export const success = async (req: Request, res: Response) => {
   res.render("client/pages/order-success", {
     pageTitle: "Order Success",
     orderDetail: orderDetail,
-    orderCode: orderDetail.code || String(orderCode)
+    orderCode: orderDetail.code || String(orderCode),
+    // A cancelled, returned or refunded order is over, so the page does not celebrate it.
+    orderEnded: ["cancelled", "returned"].includes(String(orderDetail.orderStatus)) || orderDetail.paymentStatus === "refunded"
   });
 };
 

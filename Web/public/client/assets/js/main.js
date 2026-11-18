@@ -1388,6 +1388,31 @@ const miniWishlistQuantity = () => {
 }
 miniWishlistQuantity();
 
+// Small hearts float up from a wishlist button once the product is saved; none for visitors who ask for reduced motion.
+function floatHearts(btn) {
+  if (!btn || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const rect = btn.getBoundingClientRect();
+  const originX = rect.left + window.scrollX + rect.width / 2;
+  const originY = rect.top + window.scrollY;
+
+  for (let i = 0; i < 7; i++) {
+    const heart = document.createElement("span");
+    heart.textContent = "♥";
+    heart.className = "float-heart";
+    heart.setAttribute("aria-hidden", "true");
+    heart.style.cssText =
+      "left:" + (originX + (Math.random() - 0.5) * 36) + "px;" +
+      "top:" + originY + "px;" +
+      "--dx:" + ((Math.random() - 0.5) * 50) + "px;" +
+      "--dy:" + (-(45 + Math.random() * 55)) + "px;" +
+      "animation-delay:" + (i * 70) + "ms;";
+
+    document.body.appendChild(heart);
+    heart.addEventListener("animationend", () => heart.remove());
+  }
+}
+
 const shopDetailsText = document.querySelector(".shop_details_text");
 if(shopDetailsText) {
   const elementStock = shopDetailsText.querySelector(".stock");
@@ -1706,6 +1731,7 @@ if(shopDetailsText) {
         quantity: quantity
       };
       const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+      let added = false;
 
       if(productVariants && productVariants.length > 0 && variantSelected) {
         dataItem.variant = variantSelected.attributeValue;
@@ -1732,7 +1758,7 @@ if(shopDetailsText) {
           notyf.success("Product is already in wishlist!");
         } else {
           wishlist.unshift(dataItem);
-          notyf.success("Added to wishlist!");
+          added = true;
         }
       } else {
         const existItem = wishlist.find(item => item.productId === dataItem.productId && !item.variant);
@@ -1741,12 +1767,16 @@ if(shopDetailsText) {
           notyf.success("Product is already in wishlist!");
         } else {
           wishlist.unshift(dataItem);
-          notyf.success("Added to wishlist!");
+          added = true;
         }
       }
 
       localStorage.setItem("wishlist", JSON.stringify(wishlist));
       miniWishlistQuantity();
+      if (added) {
+        notyf.success("Added to wishlist!");
+        floatHearts(buttonAddWishlist);
+      }
     }
   })
 }
@@ -1851,24 +1881,45 @@ const eventRemoveItemInCompare = () => {
   })
 }
 
-const drawComparePage = () => {
-  const compareList = JSON.parse(localStorage.getItem("compare"));
-  if(compareList.length > 0) {
-    fetch(`/api/compare/lookup`, {
+async function lookupSavedProducts(key, field, storedList) {
+  try {
+    const response = await fetch(`/api/${key}/lookup`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(compareList)
-    })
-      .then(res => res.json())
-      .then(data => {
-        if(data.code == "error") {
-          localStorage.setItem("compare", JSON.stringify([]));
-        }
+      headers: { "Content-Type": "application/json" },
+      body: storedList
+    });
+    if (!response.ok) throw new Error("Lookup request failed");
+    const data = await response.json();
+    if (data.code !== "success" || !Array.isArray(data[field])) {
+      throw new Error("Invalid lookup response");
+    }
+    return localStorage.getItem(key) === storedList ? data : null;
+  } catch {
+    if (localStorage.getItem(key) === storedList) {
+      const label = key === "compare" ? "comparison list" : "wishlist";
+      notyf.error(`Could not refresh your ${label}. Reload the page to try again.`);
+    }
+    return null;
+  }
+}
 
-        if(data.code == "success") {
+const drawComparePage = () => {
+  const storedList = localStorage.getItem("compare") || "[]";
+  const compareList = JSON.parse(storedList);
+  const area = document.querySelector(".compare_list_area");
+  const showEmpty = () => {
+    area.innerHTML = emptyStateHTML("fa-layer-group", "Nothing to compare yet", "Add products from the store to compare them side by side.", "Continue Shopping", "/product");
+  };
+  if(compareList.length > 0) {
+    lookupSavedProducts("compare", "compareList", storedList)
+      .then(data => {
+        if (data) {
           localStorage.setItem("compare", JSON.stringify(data.compareList));
+          miniCompareQuantity();
+          if (data.compareList.length === 0) {
+            showEmpty();
+            return;
+          }
 
           let html1 = "";
           let html2 = "";
@@ -1923,16 +1974,24 @@ const drawComparePage = () => {
               </td>
             `;
 
+            // The product's real average rating, drawn like the stars mixin; products with no reviews say so.
+            const ratingAvg = Number(item.detail.ratingAvg) || 0;
+            const ratingCount = Number(item.detail.ratingCount) || 0;
+            let stars = "";
+            for (let star = 1; star <= 5; star++) {
+              const icon = star <= Math.floor(ratingAvg) ? "fas fa-star"
+                : (star === Math.floor(ratingAvg) + 1 && ratingAvg - Math.floor(ratingAvg) >= 0.5) ? "fas fa-star-half-alt"
+                : "far fa-star";
+              stars += `<i class="${icon}" aria-hidden="true"></i>`;
+            }
             html5 += `
               <td>
-                <p class="rating">
-                  <i class="fas fa-star" aria-hidden="true"></i>
-                  <i class="fas fa-star" aria-hidden="true"></i>
-                  <i class="fas fa-star" aria-hidden="true"></i>
-                  <i class="fas fa-star" aria-hidden="true"></i>
-                  <i class="fas fa-star" aria-hidden="true"></i>
-                  <i class="far fa-star" aria-hidden="true"></i>
-                </p>
+                ${
+                  ratingCount > 0 ?
+                  `<p class="rating" role="img" aria-label="Rated ${ratingAvg.toFixed(1)} out of 5 from ${ratingCount} ${ratingCount === 1 ? "review" : "reviews"}">${stars} <span>(${ratingCount})</span></p>`
+                  :
+                  `<p>No reviews yet</p>`
+                }
               </td>
             `;
 
@@ -1944,7 +2003,7 @@ const drawComparePage = () => {
                   :
                   '<div class="text-danger">Out of stock</div>'
                 }
-                <a class="remove common_btn" href="javascript:;" button-remove="${index}">
+                <a class="remove common_btn" href="javascript:;" button-remove="${index}" aria-label="Remove ${esc(detail.name)} from comparison">
                   <i class="fas fa-trash" aria-hidden="true"></i>
                 </a>
               </td>
@@ -1974,10 +2033,7 @@ const drawComparePage = () => {
         }
       })
   } else {
-    const area = document.querySelector(".compare_list_area");
-    if(area) {
-      area.innerHTML = emptyStateHTML("fa-layer-group", "Nothing to compare yet", "Add products from the store to compare them side by side.", "Continue Shopping", "/product");
-    }
+    showEmpty();
   }
 }
 
@@ -2132,23 +2188,22 @@ const eventRemoveItemInWishlist = () => {
 }
 
 const drawWishlistPage = () => {
-  const wishlist = JSON.parse(localStorage.getItem("wishlist"));
+  const storedList = localStorage.getItem("wishlist") || "[]";
+  const wishlist = JSON.parse(storedList);
+  const area = document.querySelector(".wishlist_page .cart_table_area");
+  const showEmpty = () => {
+    area.innerHTML = emptyStateHTML("fa-heart", "Your wishlist is empty", "Save products you love and find them here later.", "Continue Shopping", "/product");
+  };
   if(wishlist.length > 0) {
-    fetch(`/api/wishlist/lookup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(wishlist)
-    })
-      .then(res => res.json())
+    lookupSavedProducts("wishlist", "wishlist", storedList)
       .then(data => {
-        if(data.code == "error") {
-          localStorage.setItem("wishlist", JSON.stringify([]));
-        }
-
-        if(data.code == "success") {
+        if (data) {
           localStorage.setItem("wishlist", JSON.stringify(data.wishlist));
+          miniWishlistQuantity();
+          if (data.wishlist.length === 0) {
+            showEmpty();
+            return;
+          }
 
           let htmlWishlistTable = "";
 
@@ -2212,7 +2267,7 @@ const drawWishlistPage = () => {
                     </button>
                   </div>
                 </td>
-                <td class="cart_page_price">
+                <td class="cart_page_total">
                   <h3>${formatMoney((item.quantity*priceNew))}</h3>
                 </td>
                 <td class="cart_page_action">
@@ -2237,10 +2292,7 @@ const drawWishlistPage = () => {
         }
       })
   } else {
-    const area = document.querySelector(".wishlist_page .cart_table_area");
-    if(area) {
-      area.innerHTML = emptyStateHTML("fa-heart", "Your wishlist is empty", "Save products you love and find them here later.", "Continue Shopping", "/product");
-    }
+    showEmpty();
   }
 }
 
@@ -3487,6 +3539,7 @@ document.addEventListener('click', (e) => {
       localStorage.setItem('wishlist', JSON.stringify(wishlist));
       miniWishlistQuantity();
       notyf.success('Added to wishlist!');
+      floatHearts(btnWishlist);
     }
     return;
   }

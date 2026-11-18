@@ -320,9 +320,9 @@ export const createOrder = async (
   }
 
   let savedOrderId: string | undefined;
-  const session = await mongoose.startSession();
   try {
-    await session.withTransaction(async () => {
+    await mongoose.connection.transaction(async (session) => {
+      savedOrderId = undefined;
       if (accountUser?.id && couponDetail) {
         await AccountUser.updateOne({ _id: accountUser.id }, { $inc: { orderLock: 1 } }, { session });
         const recheck = await checkCouponValidity(couponDetail.code as string, accountUser.id, session);
@@ -388,7 +388,7 @@ export const createOrder = async (
         }
       }
 
-      await Promise.all(productList.map((p) => p.save({ session })));
+      for (const product of productList) await product.save({ session });
 
       if (dataFinal._couponId && couponDetail) {
         const queryCond: Record<string, unknown> = { _id: dataFinal._couponId, deleted: false, status: "active" };
@@ -425,27 +425,43 @@ export const createOrder = async (
       }
     });
   } catch (error: unknown) {
-    // The shipment was booked before the transaction. Release it unless the order was saved after all:
-    // withTransaction can throw when a commit's outcome is unknown even though it succeeded.
-    const committed = savedOrderId ? await Order.exists({ _id: savedOrderId }).catch(() => null) : null;
-    if (!committed) await cancelOrderShipment(dataFinal.shipping, shippingCtx);
-    const customErr = error as { code?: string; status?: number; message?: string };
-    if (customErr?.code === "out_of_stock") {
-      return { success: false, status: customErr.status ?? 409, message: customErr.message || "One or more items are out of stock!" };
-    } else if (customErr?.code === "coupon_invalid") {
-      return { success: false, status: customErr.status ?? 400, message: customErr.message || "Invalid coupon code!" };
-    } else if (customErr?.code === "coupon_limit") {
-      return { success: false, status: 409, message: "Coupon has reached its usage limit!" };
-    } else if (customErr?.code === "points_insufficient") {
-      return { success: false, status: 409, message: "Not enough loyalty points!" };
-    } else if ((error as { code?: number })?.code === 11000) {
-      return { success: false, status: 409, message: "Your order could not be saved this time. Please press Place Order again." };
-    } else {
-      console.error("Checkout transaction error:", error);
-      return { success: false, status: 500, message: "An error occurred during checkout. Please try again." };
+    // A commit can succeed even when the driver could not confirm its outcome.
+    let committed = false;
+    try {
+      committed = !!(savedOrderId && await Order.exists({ _id: savedOrderId }).read("primary"));
+      if (!committed && error instanceof mongoose.mongo.MongoError && error.hasErrorLabel("UnknownTransactionCommitResult")) {
+        throw error;
+      }
+    } catch (verificationError: unknown) {
+      console.error(
+        `[Checkout] Could not verify order ${dataFinal.code} before cancelling shipment.`,
+        verificationError instanceof Error ? verificationError.message : String(verificationError)
+      );
+      return {
+        success: false,
+        status: 500,
+        message: `We could not confirm order ${dataFinal.code}. Check its status or contact the store before placing another order.`
+      };
     }
-  } finally {
-    session.endSession();
+
+    if (!committed) {
+      await cancelOrderShipment(dataFinal.shipping, shippingCtx);
+      const customErr = error as { code?: string; status?: number; message?: string };
+      if (customErr?.code === "out_of_stock") {
+        return { success: false, status: customErr.status ?? 409, message: customErr.message || "One or more items are out of stock!" };
+      } else if (customErr?.code === "coupon_invalid") {
+        return { success: false, status: customErr.status ?? 400, message: customErr.message || "Invalid coupon code!" };
+      } else if (customErr?.code === "coupon_limit") {
+        return { success: false, status: 409, message: "Coupon has reached its usage limit!" };
+      } else if (customErr?.code === "points_insufficient") {
+        return { success: false, status: 409, message: "Not enough loyalty points!" };
+      } else if ((error as { code?: number })?.code === 11000) {
+        return { success: false, status: 409, message: "Your order could not be saved this time. Please press Place Order again." };
+      } else {
+        console.error("Checkout transaction error:", error);
+        return { success: false, status: 500, message: "An error occurred during checkout. Please try again." };
+      }
+    }
   }
 
   if (accountUser?.id) {

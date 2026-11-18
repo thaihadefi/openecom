@@ -12,6 +12,8 @@ Every store gets a storefront, an admin panel and a JSON API. For a new client y
 
 The baseline also includes live chat between customers and staff (with optional AI helpers for staff), product recommendations, suspicious-order detection and stock forecasting; each of them can be switched off.
 
+**[Live storefront](https://openecom.vietops.vn/)**
+
 ## Contents
 
 - [Getting started](#getting-started)
@@ -172,7 +174,7 @@ Modules marked *(optional)* can be switched off with a feature flag.
 **Customers**
 - Sign up, log in (email/password, plus Google and Facebook once configured) and reset the password with an email OTP.
 - Browse, filter, sort and search products (with live suggestions). For products with variants such as size and color, shoppers choose their options before adding to cart; only groups with a single value are preselected. The picker updates price, stock and images.
-- Cart (kept in the browser), wishlist *(optional)* and product comparison *(optional)*.
+- Cart (kept in the browser), wishlist *(optional)* and product comparison *(optional)*. With reviews enabled, comparison shows each product's average rating and review count.
 - Checkout with coupons *(optional)*, loyalty points *(optional)*, a map address picker and GoShip rates from several carriers, cheapest first (weight per product, with a store default).
 - Checkout selects the default Address Book entry when available, or prefills the recipient name and phone from the profile. “Edit for this order” copies a saved address into an editable form; changes apply only to the current order. Coupons entered in the cart carry over to checkout, where “Add or change coupon” opens the editor.
 - Pay by cash on delivery, VNPay or ZaloPay out of the box, with room for [more gateways](#adding-a-payment-gateway) (only the methods the store has set up are offered), and a retry button when an online payment did not finish.

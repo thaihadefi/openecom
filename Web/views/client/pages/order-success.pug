@@ -1,12 +1,15 @@
 extends ../layouts/default.pug
 
 block main
+  - const ended = typeof orderEnded !== "undefined" ? orderEnded : !!(orderDetail && (["cancelled", "returned"].includes(orderDetail.orderStatus) || orderDetail.paymentStatus === "refunded"))
+  - const paymentIncomplete = !!(!ended && orderDetail && isOnlinePayment(orderDetail.paymentMethod) && orderDetail.paymentStatus === "unpaid")
+  - const celebrationKey = `order-celebrated-${(orderDetail && orderDetail.code) || orderCode}`
   section(class="payment_success mt_100 mb_100")
     .container
       .row.justify-content-center
         .col-xl-6.col-md-10.col-lg-8.col-xxl-5.wow.fadeInUp
           div(class="payment_success_text")
-            if (orderDetail && isOnlinePayment(orderDetail.paymentMethod) && orderDetail.paymentStatus === "unpaid")
+            if (paymentIncomplete)
               h1(style="color: #d97706;") Payment Incomplete
               p
                 | Your order <b>#{orderDetail.code}</b> has been placed, but payment was not completed yet.
@@ -26,9 +29,14 @@ block main
                     href="/"
                     ) Back to Home
             else
-              h1 Order Placed Successfully!
+              if ended
+                h1 Order Closed
+              else
+                h1 Order Placed Successfully!
               p
-                | Thank you for your purchase! Your Order ID is <b>#{orderDetail ? orderDetail.code : orderCode}</b>
+                if !ended
+                  | #{"Thank you for your purchase! "}
+                | Your Order ID is <b>#{(orderDetail && orderDetail.code) || orderCode}</b>
               .d-flex.flex-wrap.align-items-center.justify-content-center.gap-3
                 a(
                   class="common_btn go_btn"
@@ -55,3 +63,32 @@ block main
                     )
                     | Log In
                     i.fas.fa-long-arrow-right(aria-hidden="true")
+
+  //- Celebrate a placed order once per browser. Online orders must be paid first.
+  if (orderDetail && !ended && !paymentIncomplete)
+    script(src=`/client/assets/js/confetti.browser.min.js?v=${assetVersion}` defer)
+    script.
+      document.addEventListener("DOMContentLoaded", function() {
+        const celebrationKey = !{safeJson(celebrationKey)};
+        let celebrated = false;
+        try { celebrated = localStorage.getItem(celebrationKey) === "1"; } catch (e) {}
+        if (!celebrated && typeof confetti === "function" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          try { localStorage.setItem(celebrationKey, "1"); } catch (e) {}
+          const duration = 4 * 1000;
+          const animationEnd = Date.now() + duration;
+          const defaults = { startVelocity: 35, spread: 360, ticks: 70, zIndex: 99999 };
+
+          function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+          }
+
+          const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+
+            const particleCount = 60 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+          }, 250);
+        }
+      });

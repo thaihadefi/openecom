@@ -19,6 +19,8 @@ export interface ICompareDetailItem extends ICompareItemInput {
     stock?: number;
     attributeList: IAttributeProduct[];
     variants?: unknown[];
+    ratingAvg?: number;
+    ratingCount?: number;
   };
 }
 
@@ -30,7 +32,7 @@ export const getCompareDetailList = async (compareList: ICompareItemInput[]): Pr
     _id: { $in: productIds },
     deleted: false,
     status: "active"
-  }).select("_id slug name description priceNew priceOld stock images attributes variants");
+  }).select("_id slug name description priceNew priceOld stock images attributes variants ratingAvg ratingCount");
   const productMap = new Map(products.map((p) => [String(p._id), p]));
 
   const attrList = await getActiveAttributes();
@@ -51,7 +53,9 @@ export const getCompareDetailList = async (compareList: ICompareItemInput[]): Pr
           priceOld: productDetail.priceOld,
           stock: productDetail.stock,
           attributeList,
-          variants: productDetail.variants
+          variants: productDetail.variants,
+          ratingAvg: productDetail.ratingAvg,
+          ratingCount: productDetail.ratingCount
         }
       });
     }

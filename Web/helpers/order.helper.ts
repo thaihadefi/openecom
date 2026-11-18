@@ -9,8 +9,6 @@ export const releaseOrderResources = async (
   order: Pick<IOrder, "items" | "usedPoint" | "pointEarned" | "coupon" | "userId">,
   session: ClientSession,
 ): Promise<void> => {
-  const tasks: Promise<unknown>[] = [];
-
   if (order.items && order.items.length > 0) {
     const productIds = [...new Set(order.items.map((i) => i.productId).filter(Boolean))];
     const productList = await Product.find({ _id: { $in: productIds } }).session(session);
@@ -51,7 +49,7 @@ export const releaseOrderResources = async (
         }
       }
     }
-    await Promise.all(productList.map((p) => p.save({ session })));
+    for (const product of productList) await product.save({ session });
   }
 
   const userInc: Record<string, number> = {};
@@ -62,26 +60,20 @@ export const releaseOrderResources = async (
     userInc.totalPoint = -order.pointEarned;
   }
   if (Object.keys(userInc).length > 0) {
-    tasks.push(
-      AccountUser.updateOne(
-        { _id: order.userId },
-        { $inc: userInc },
-        { session },
-      ),
+    await AccountUser.updateOne(
+      { _id: order.userId },
+      { $inc: userInc },
+      { session },
     );
   }
 
   if (order.coupon) {
-    tasks.push(
-      Coupon.updateOne(
-        { code: order.coupon, usedCount: { $gt: 0 } },
-        { $inc: { usedCount: -1 } },
-        { session },
-      ),
+    await Coupon.updateOne(
+      { code: order.coupon, usedCount: { $gt: 0 } },
+      { $inc: { usedCount: -1 } },
+      { session },
     );
   }
-
-  await Promise.all(tasks);
 };
 
 export const notifyOrderStatusChange = (

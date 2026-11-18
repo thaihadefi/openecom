@@ -9,20 +9,21 @@ block main
     `/wishlist`
   )
 
-  section(class="wishlist_page cart_page mt_100 mb_100")
+  section(class="wishlist_page cart_page mt_60 mb_100")
     .container
+      .wishlist_header_bar.mb-4.text-center
+        p.wishlist_sub Products you saved for later, ready to add to your cart.
       .row.justify-content-center
         .col-xxl-10.col-xl-11
-          .wow.fadeInUp(class="cart_table_area")
+          .wow.fadeInUp(class="cart_table_area wishlist_card_wrapper")
             .table-responsive
-              table.table
+              table.table.wishlist_table
                 thead
                   tr
-                    th(class="cart_page_img") Product Image
-                    th(class="cart_page_details") Product Details
+                    th(class="cart_page_img") Product
+                    th(class="cart_page_details") Details
                     th(class="cart_page_price") Price
                     th(class="cart_page_quantity") Quantity
-                    th(class="cart_page_price") Subtotal
+                    th(class="cart_page_total") Subtotal
                     th(class="cart_page_action") Action
                 tbody(wishlist-table)
-

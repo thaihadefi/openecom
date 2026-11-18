@@ -1901,11 +1901,14 @@ header form .input .inner-voice.recording {
     white-space: normal !important;
 }
 
-.wishlist_page .cart_page_action {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
+/* The wishlist action buttons stack inside their cell, right-aligned. */
+.wishlist_page td.cart_page_action > * {
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+}
+.wishlist_page td.cart_page_action > * + * {
+    margin-top: 8px;
 }
 
 .wishlist_page .cart_page_action a.remove.common_btn {
@@ -3386,6 +3389,34 @@ footer, .footer_main {
 }
 .offcanvas-header .btn-close { filter: none !important; opacity: .6; }
 
+.mini_cart .offcanvas-header .btn-close,
+.default_home .mini_cart .offcanvas-header .btn-close {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: 0 !important;
+    margin: 0;
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink);
+    opacity: 1;
+    transition: none;
+}
+.mini_cart .offcanvas-header .btn-close:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+}
+.mini_cart .offcanvas-header .btn-close i {
+    display: block !important;
+    font-size: 16px;
+}
+.mini_cart .offcanvas-header .btn-close:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
+
 .banner_slider_2_text { max-width: 56% !important; }
 .banner_slider_2::after, .banner_add::after {
     background: linear-gradient(105deg, rgba(12,10,9,.62) 0%, rgba(12,10,9,.38) 42%, rgba(12,10,9,.06) 70%) !important;
@@ -4725,7 +4756,8 @@ main#main-content > .page_breadcrumb + section { padding-top: 0 !important; }
 /* Cart rows below 1200 px: each row becomes a card. The table's column minimums add up to about 950 px,
    wider than its frame, so as a table the quantity, subtotal and remove controls scroll out of view. */
 @media (max-width: 1199.98px) {
-    .cart_page .cart_table_area .table-responsive { overflow: visible; }
+    /* Only the cart turns rows into cards; the wishlist shares .cart_page but keeps its table, so it must still scroll. */
+    .cart_page .cart_table_area .table-responsive:has([cart-table]) { overflow: visible; }
     /* Keep the column headers in the accessibility tree when rows become cards. */
     .cart_page .cart_table_area table:has([cart-table]) thead {
         position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -4843,4 +4875,86 @@ main#main-content > .page_breadcrumb + section { padding-top: 0 !important; }
 .dashboard_profile_info_list ul li > span { width: auto; overflow-wrap: anywhere; }
 @media (max-width: 575px) {
   .dashboard_profile_info_list ul li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+
+/* Hearts that float up from the wishlist button after main.js has saved the product. */
+.float-heart {
+    position: absolute;
+    font-size: 18px;
+    color: var(--themeColorOne);
+    pointer-events: none;
+    z-index: 99999;
+    user-select: none;
+    animation: gentleHeartFloat 0.9s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+@keyframes gentleHeartFloat {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.6);
+    }
+    40% {
+        opacity: 0.9;
+        transform: translate(calc(-50% + var(--dx) * 0.5), calc(-50% + var(--dy) * 0.5)) scale(1.15);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.6);
+    }
+}
+
+/* Wishlist and compare: one line under the banner says what the page is for; the tables sit in a thin-ruled frame. */
+.wishlist_sub, .compare_sub {
+    max-width: 60ch;
+    margin: 0 auto;
+    font-size: 16px;
+    color: var(--muted) !important;
+}
+.wishlist_page:has(.store_empty_state) .wishlist_sub,
+.compare_page:has(.store_empty_state) .compare_sub { display: none; }
+.wishlist_card_wrapper, .compare_card_wrapper {
+    background: var(--surface) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: none !important;
+    padding: 8px;
+}
+.wishlist_page .wishlist_table thead th {
+    background: var(--surface-2) !important;
+    color: var(--ink) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-transform: uppercase;
+    padding: 14px 16px !important;
+    border: none !important;
+}
+.wishlist_table tbody td {
+    padding: 14px 16px !important;
+    vertical-align: middle !important;
+    border-top: 1px solid var(--line) !important;
+    color: var(--muted) !important;
+}
+.wishlist_page .cart_page_img img {
+    width: 72px !important;
+    height: 72px !important;
+    object-fit: cover !important;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--line) !important;
+}
+.compare_table td.compare_label_col {
+    background: var(--surface-2) !important;
+    color: var(--ink) !important;
+    font-weight: 700 !important;
+    width: 160px;
+    border-right: 1px solid var(--line) !important;
+}
+.compare_table td {
+    padding: 16px !important;
+    border: 1px solid var(--line) !important;
+    vertical-align: middle !important;
+    color: var(--muted);
+}
+.compare_table td img {
+    max-height: 110px !important;
+    object-fit: contain !important;
+    border-radius: var(--radius-lg);
 }

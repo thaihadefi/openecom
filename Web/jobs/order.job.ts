@@ -26,19 +26,19 @@ export const autoCancelUnpaidOrders = () => {
     const cancelPromises = staleOrders.map(async (order) => {
       try {
         const session = await mongoose.startSession();
-        let cancelled = false;
+        let cancelled: boolean;
         try {
-          await session.withTransaction(async () => {
+          cancelled = await session.withTransaction(async () => {
             const result = await Order.updateOne(
               { _id: order._id, orderStatus: "pending", paymentStatus: "unpaid" },
               { orderStatus: "cancelled", pointEarned: 0 },
               { session }
             );
 
-            if (result.modifiedCount === 0) return;
-            cancelled = true;
+            if (result.modifiedCount === 0) return false;
 
             await releaseOrderResources(order, session);
+            return true;
           });
         } finally {
           session.endSession();

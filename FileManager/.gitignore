@@ -10,4 +10,3 @@ media/users/*
 media/chats/*
 !media/chats/.gitkeep
 media/demo-seed/*
-
