@@ -475,6 +475,7 @@ export const createOrder = async (
     scoreOrderForAnomaly(savedOrderId).catch((error) => console.error("Anomaly scoring error:", error));
   }
 
+  const paymentPending = paymentMethod.online && dataFinal.paymentStatus !== "paid";
   if (accountUser?.email) {
     emailTemplates.orderConfirmation({
       code: dataFinal.code || "",
@@ -486,6 +487,7 @@ export const createOrder = async (
       shipping: dataFinal.shipping,
       total: dataFinal.total,
       paymentMethod: dataFinal.paymentMethod || "",
+      paymentPending,
       coupon: dataFinal.coupon || undefined,
       usedPoint: dataFinal.usedPoint,
       pointDiscount: dataFinal.pointDiscount,
@@ -494,13 +496,13 @@ export const createOrder = async (
   }
 
   const orderQuery = `orderCode=${encodeURIComponent(dataFinal.code || "")}&phone=${encodeURIComponent(dataFinal.phone || "")}`;
-  const redirectUrl = paymentMethod.online && dataFinal.paymentStatus !== "paid"
+  const redirectUrl = paymentPending
     ? `/order/payment-${paymentMethod.id}?${orderQuery}`
     : `/order/success?${orderQuery}`;
 
   return {
     success: true,
-    message: "Order placed successfully!",
+    message: paymentPending ? "Order received. Complete your online payment to continue." : "Order placed successfully!",
     orderCode: dataFinal.code,
     phone: dataFinal.phone,
     total: dataFinal.total,

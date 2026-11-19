@@ -179,6 +179,7 @@ export const emailTemplates = {
     shipping: { fee: number };
     total: number;
     paymentMethod: string;
+    paymentPending: boolean;
     coupon?: string;
     usedPoint?: number;
     pointDiscount?: number;
@@ -224,6 +225,7 @@ export const emailTemplates = {
           <tr><td colspan="2" style="padding:8px 0;font-weight:700;font-size:16px;border-top:2px solid #e5e7eb;">Total</td><td style="padding:8px 0;text-align:right;font-weight:700;font-size:16px;border-top:2px solid #e5e7eb;color:${brandPrimary()};">${formatPrice(order.total)}</td></tr>
         </table>
 
+        ${order.paymentPending ? "<p>Payment is pending. Complete your online payment to continue.</p>" : ""}
         <p style="color:#6b7280;font-size:14px;">We'll notify you when your order status changes.</p>`
       )
     };

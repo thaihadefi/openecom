@@ -9,15 +9,23 @@ import * as anomalyDetection from "../services/admin/anomaly-detection.service";
 import { createOrder } from "../services/client/order.service";
 import * as shipping from "../services/shipping/shipping.service";
 
-for (const outcome of ["committed", "aborted", "lookup-unavailable", "commit-unconfirmed"] as const) {
-  test(`checkout handles the ${outcome} outcome after losing the commit response`, async (t) => {
+for (const [outcome, method] of [
+  ["committed", "money"],
+  ["committed", "zalopay"],
+  ["aborted", "money"],
+  ["lookup-unavailable", "money"],
+  ["commit-unconfirmed", "money"]
+] as const) {
+  test(`checkout handles the ${outcome} outcome for ${method} after losing the commit response`, async (t) => {
     const productId = new mongoose.Types.ObjectId();
     const product = { _id: productId, name: "Product", priceNew: 100, stock: 5, save: async () => {} };
     const shipment = { provider: "goship", externalId: "SHIP-1", fee: 10 };
     const cancel = t.mock.method(shipping, "cancelOrderShipment", async () => true);
     t.mock.method(shipping, "getShippingContext", async () => ({ settings: {} }));
     t.mock.method(shipping, "createShipment", async () => shipment);
-    t.mock.method(settings, "getApiPayment", async () => ({}));
+    t.mock.method(settings, "getApiPayment", async () => ({
+      zaloPayAppId: "test", zaloPayKey1: "test", zaloPayKey2: "test"
+    }));
     t.mock.method(attributes, "getActiveAttributes", async () => []);
     t.mock.method(anomalyDetection, "scoreOrderForAnomaly", async () => {});
     t.mock.method(Product, "find", () => ({
@@ -43,7 +51,7 @@ for (const outcome of ["committed", "aborted", "lookup-unavailable", "commit-unc
     t.mock.method(console, "error", () => {});
 
     const result = await createOrder({
-      paymentMethod: "money",
+      paymentMethod: method,
       shippingMethod: "goship:rate-1",
       items: [{ productId: String(productId), quantity: 1 }],
     });
@@ -51,7 +59,13 @@ for (const outcome of ["committed", "aborted", "lookup-unavailable", "commit-unc
     assert.equal(cancel.mock.callCount(), outcome === "aborted" ? 1 : 0);
     if (outcome === "committed") {
       assert.equal(result.success, true);
-      assert.match(result.redirectUrl ?? "", /^\/order\/success\?orderCode=/);
+      if (method === "zalopay") {
+        assert.equal(result.paymentStatus, "unpaid");
+        assert.match(result.redirectUrl ?? "", /^\/order\/payment-zalopay\?orderCode=/);
+        assert.match(result.message, /Complete your online payment/);
+      } else {
+        assert.match(result.redirectUrl ?? "", /^\/order\/success\?orderCode=/);
+      }
     } else {
       assert.equal(result.success, false);
       if (outcome !== "aborted") assert.match(result.message, /before placing another order/);

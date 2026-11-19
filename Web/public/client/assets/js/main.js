@@ -3206,15 +3206,11 @@ if(buttonOrder) {
 
           sessionStorage.removeItem("couponDetail");
 
-          if (data.paymentStatus === "paid" || data.total === 0) {
+          const nextPage = data.redirectUrl || `/order/success?orderCode=${encodeURIComponent(data.orderCode)}&phone=${encodeURIComponent(data.phone)}`;
+          if (!nextPage.startsWith("/order/payment-")) {
             drawNotify(data.code, data.message);
-            window.location.href = `/order/success?orderCode=${data.orderCode}&phone=${data.phone}`;
-            return;
           }
-
-          // The server decides the next page: the order summary, or the payment gateway.
-          drawNotify(data.code, data.message);
-          window.location.href = data.redirectUrl || `/order/success?orderCode=${data.orderCode}&phone=${data.phone}`;
+          window.location.href = nextPage;
         }
       })
       .catch(() => {

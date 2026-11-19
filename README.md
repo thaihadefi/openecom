@@ -258,6 +258,8 @@ Once the site is hosted, register the VNPay IPN (`/order/payment-vnpay-ipn`) and
 
 If the browser returns before the ZaloPay callback, the order page checks for confirmation for up to 30 seconds and shows the result automatically when it arrives. Customers can check again after that. For an open order linked to an account with an email address, the first verified online payment confirmation triggers a payment receipt in addition to the order placement email.
 
+The order placement email flags online payments that are still pending. Checkout opens the gateway without showing a success notification first.
+
 ## Search and AI discovery
 
 Search engines and AI assistants read the store from the same data the pages show; nothing here needs its own content.
